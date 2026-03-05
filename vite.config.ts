@@ -8,5 +8,16 @@ export default defineConfig({
     host: '127.0.0.1',
     port: 5173,
     strictPort: true
+  },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-ui': ['framer-motion', 'recharts', 'lucide-react'],
+          'vendor-web3': ['ethers', '@web3modal/ethers']
+        }
+      }
+    }
   }
 })
