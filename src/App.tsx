@@ -534,10 +534,10 @@ function App() {
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '10px 0 20px' }}>{t.defi.buyDesc}</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <a href={`https://traderjoexyz.com/avalanche/trade?outputCurrency=${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                    TraderJoe (DEX)
+                    <TrendingUp size={18} style={{ marginRight: '8px' }} /> TraderJoe (DEX)
                   </a>
                   <a href={`https://dexscreener.com/avalanche/${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-social" style={{ width: '100%', justifyContent: 'center' }}>
-                    {t.defi.buyAnalytics}
+                    <BarChart3 size={18} style={{ marginRight: '8px' }} /> {t.defi.buyAnalytics}
                   </a>
                 </div>
               </div>
@@ -803,16 +803,16 @@ function App() {
       <footer className="footer polished-granite">
         <div className="container" style={{ textAlign: 'center' }}>
           <div className="footer-links" style={{ display: 'flex', justifyContent: 'center', gap: '25px', marginBottom: '25px', alignItems: 'center' }}>
-            <a href={t.footer.social.telegram} target="_blank" rel="noopener noreferrer" className="social-icon-btn" aria-label="Telegram">
-              <Send size={20} />
+            <a href={t.footer.social.email} className="social-icon-btn" aria-label="Email">
+              <Mail size={20} />
             </a>
             <a href={t.footer.social.twitter} target="_blank" rel="noopener noreferrer" className="social-icon-btn" aria-label="X (formerly Twitter)">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
               </svg>
             </a>
-            <a href={t.footer.social.email} className="social-icon-btn" aria-label="Email">
-              <Mail size={20} />
+            <a href={t.footer.social.telegram} target="_blank" rel="noopener noreferrer" className="social-icon-btn" aria-label="Telegram">
+              <Send size={20} />
             </a>
             <div style={{ width: '1px', height: '20px', background: 'rgba(255,255,255,0.1)', margin: '0 5px' }}></div>
             <a href="#" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.8rem', fontWeight: '600' }} onClick={(e) => { e.preventDefault(); setIsModalOpen(true); }}>{t.footer.terms}</a>

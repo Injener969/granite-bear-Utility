@@ -15,5 +15,11 @@ module.exports = {
             chainId: 43114,
             accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : []
         }
+    },
+    etherscan: {
+        apiKey: {
+            avalanche: process.env.SNOWTRACE_API_KEY,
+            snowtrace: process.env.SNOWTRACE_API_KEY
+        }
     }
 };
