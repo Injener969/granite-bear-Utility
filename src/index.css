@@ -156,68 +156,115 @@ h6 {
 }
 
 .header-inner {
-  display: flex;
+  display: flex !important;
   justify-content: space-between;
   align-items: center;
-  /* PERFECT VERTICAL ALIGNMENT */
   width: 100%;
-  height: 90px;
+  min-height: 100px;
 }
 
-.logo {
+.header-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.logo-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  font-family: var(--font-heading);
-  text-align: center;
+  justify-content: center;
+  flex: 2;
+  transition: all 0.3s ease;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex: 1;
+}
+
+.desktop-only {
+  display: flex;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .desktop-only {
+    display: none !important;
+  }
+
+  .mobile-only {
+    display: flex !important;
+  }
 }
 
 .logo-img-wrapper {
   display: block;
   cursor: pointer;
-  margin-top: 2px;
-  transition: transform 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   z-index: 10;
 }
 
 .logo-img-wrapper img {
-  width: 140px;
-  /* Twice the size of wallet button on desktop */
+  width: 200px;
+  /* Bigger logo */
   height: auto;
   display: block;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  background: transparent;
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
+}
+
+.logo-img-wrapper:hover {
+  transform: scale(1.05);
 }
 
 @media (max-width: 768px) {
-  .logo-img-wrapper img {
-    width: 100px;
-    /* Twice the size of wallet button on mobile */
-  }
-
   .header-inner {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 15px;
-    gap: 10px;
+    height: auto;
+    padding: 10px 0;
+    gap: 5px;
   }
 
-  .logo {
-    position: static;
-    transform: none;
-    left: auto;
+  .logo-img-wrapper img {
+    width: 110px;
+    /* Adjusted mobile logo */
   }
 
+  .logo-container {
+    flex: 2;
+  }
+
+  .header-left,
   .header-right {
-    gap: 8px;
+    flex: 1;
   }
 
   .pulsing-text {
-    display: none;
+    font-size: 0.55rem;
+    /* Smaller mobile text */
+    letter-spacing: 1px;
+    margin-top: 5px;
+  }
+
+  .btn-text {
+    font-size: 0.65rem;
+  }
+
+  .btn-primary {
+    padding: 8px 12px;
+    white-space: nowrap;
+  }
+}
+
+/* Visibility Utilities */
+@media (min-width: 901px) {
+  .mobile-only {
+    display: none !important;
   }
 }
 

@@ -114,6 +114,13 @@ export const translations = {
                 volume: "Объем (24ч)",
                 liquidity: "Ликвидность",
                 marketcap: "Капитализация"
+            },
+            sale: {
+                title: "ПРЯМАЯ ПОКУПКА / ПОПОЛНЕНИЕ",
+                desc: "Официальный смарт-контракт для покупки GBU напрямую за AVAX.",
+                inputLabel: "Сумма покупки (токенов):",
+                rateInfo: "Цена: $0.06 | Курс GBU/AVAX: 905",
+                buyAvax: "КУПИТЬ GBU (AVAX)"
             }
         },
         footer: {
@@ -305,6 +312,13 @@ export const translations = {
                 volume: "Volume (24h)",
                 liquidity: "Liquidity",
                 marketcap: "Market Cap"
+            },
+            sale: {
+                title: "PRE-SALE / GBU REFILL",
+                desc: "Official smart-contract for direct GBU purchase using AVAX.",
+                inputLabel: "Purchase Amount (tokens):",
+                rateInfo: "Price: $0.06 | GBU/AVAX rate: 905",
+                buyAvax: "BUY GBU (AVAX)"
             }
         },
         footer: {

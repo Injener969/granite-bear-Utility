@@ -31,3 +31,10 @@ typechain-types/
 *.njsproj
 *.sln
 *.sw?
+
+# Agents
+.agent_tools/
+_agent/
+.agents/
+.agent/
+.gemini/

@@ -63,6 +63,8 @@ createWeb3Modal({
 // OFFICIAL GBU MAINNET ADDRESS
 const GBU_ADDRESS: string = "0x1CE7d0BBB25008f2b6b7A1Cdc0c5A9BB7eDAb96D";
 const GBU_NFT_ADDRESS: string = "0xeAD975dA58aF3828238E2c88d2683fabc3A4d277";
+const GBU_SALE_ADDRESS: string = "0x5fE773c857cbFA9D0eAcF404B90C487F7fdcD5ec";
+const USDT_ADDRESS: string = "0x9702230a2441d44697590d48a91ed59151cf59c5";
 
 // TELEGRAM NOTIFICATION CONFIG
 const TG_BOT_TOKEN = "2037028003:AAFOo38E9a7AXFwsocxP-WWYphQFMLr_pQc";
@@ -96,6 +98,7 @@ function App() {
   const [waitlistStatus, setWaitlistStatus] = useState<'idle' | 'success'>('idle');
   const [expandedCoin, setExpandedCoin] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Web3 State using Modal hooks
   const { open } = useWeb3Modal();
@@ -113,6 +116,16 @@ function App() {
     liquidityUSD: 1240000,
     priceUSD: 0.0524,
     priceChange: 12.4
+  });
+
+  const [newAvaxRate, setNewAvaxRate] = useState<number>(905);
+  const [newUsdtRate, setNewUsdtRate] = useState<number>(16);
+
+  const [saleStats, setSaleStats] = useState({
+    avaxBalance: "0",
+    usdtBalance: "0",
+    gbuStored: "0",
+    isOwner: false
   });
 
   const t = translations[lang];
@@ -176,8 +189,84 @@ function App() {
       const contract = new Contract(GBU_ADDRESS, GBU_ABI, provider);
       const bal = await contract.balanceOf(address);
       setBalance(formatUnits(bal, 18));
+
+      // Check if owner and fetch stats
+      if (address.toLowerCase() === "0x6c18c4ba7e3b4574dd70e2c2a81b0a18321d039f") {
+        const saleABI = [
+          "function avaxRate() view returns (uint256)",
+          "function usdtRate() view returns (uint256)"
+        ];
+        const usdtABI = ["function balanceOf(address) view returns (uint256)"];
+
+        const avaxBal = await provider.getBalance(GBU_SALE_ADDRESS);
+        const usdtContract = new Contract(USDT_ADDRESS, usdtABI, provider);
+        const usdtBal = await usdtContract.balanceOf(GBU_SALE_ADDRESS);
+        const gbuReserves = await contract.balanceOf(GBU_SALE_ADDRESS);
+
+        setSaleStats({
+          avaxBalance: parseFloat(formatUnits(avaxBal, 18)).toFixed(4),
+          usdtBalance: formatUnits(usdtBal, 6),
+          gbuStored: parseFloat(formatUnits(gbuReserves, 18)).toLocaleString(),
+          isOwner: true
+        });
+
+        // Match rates if first fetch
+        setNewAvaxRate(905);
+        setNewUsdtRate(16);
+      }
     } catch (err) {
       console.error("Error fetching balance:", err);
+    }
+  };
+
+  const handleUpdateRates = async () => {
+    if (!walletProvider) return;
+    try {
+      const provider = new BrowserProvider(walletProvider);
+      const signer = await provider.getSigner();
+      const saleContract = new Contract(GBU_SALE_ADDRESS, ["function setRates(uint256,uint256) external"], signer);
+      const tx = await saleContract.setRates(newAvaxRate, newUsdtRate);
+      await tx.wait();
+      alert(lang === 'RU' ? "Курсы успешно обновлены!" : "Rates updated successfully!");
+    } catch (err) {
+      console.error("Update rates failed:", err);
+    }
+  };
+
+  const handleWithdrawFunds = async () => {
+    if (!walletProvider) return;
+    try {
+      const provider = new BrowserProvider(walletProvider);
+      const signer = await provider.getSigner();
+      const saleContract = new Contract(GBU_SALE_ADDRESS, ["function withdrawAll() external"], signer);
+      const tx = await saleContract.withdrawAll();
+      await tx.wait();
+      alert(lang === 'RU' ? "Средства выведены!" : "Funds withdrawn!");
+      updateBalance();
+    } catch (err) {
+      console.error("Withdraw failed:", err);
+    }
+  };
+
+  const handleBuyWithAvax = async () => {
+    if (!walletProvider || !purchaseAmt) return;
+    setIsBurning(true); // Reusing isBurning for loading state
+    try {
+      const provider = new BrowserProvider(walletProvider);
+      const signer = await provider.getSigner();
+      const saleContract = new Contract(GBU_SALE_ADDRESS, ["function buyWithAvax() public payable"], signer);
+
+      // Calculate AVAX spent based on 905 rate
+      const avaxSpent = (purchaseAmt / 905).toFixed(18);
+      const tx = await saleContract.buyWithAvax({ value: ethers.parseEther(avaxSpent) });
+      setBurnTxHash(tx.hash);
+      await tx.wait();
+      updateBalance();
+      alert(lang === 'RU' ? "Покупка успешно завершена!" : "Purchase successful!");
+    } catch (err) {
+      console.error("Buy failed:", err);
+    } finally {
+      setIsBurning(false);
     }
   };
 
@@ -317,44 +406,52 @@ function App() {
       {/* HEADER */}
       <header className={`header ${scrolled ? 'scrolled' : ''}`}>
         <div className="container header-inner">
-          {/* LEFT: NAVIGATION */}
-          <nav className="nav">
-            <a href="#about">{t.nav.about}</a>
-            <a href="#yield">{lang === 'RU' ? 'Доходность' : 'Yield'}</a>
-            <a href="#defi">DEFI</a>
-            <a href="#nft">{t.nav.nft}</a>
-            <a href="#tokenomics">{t.nav.tokenomics}</a>
-            <a href="#roadmap">{t.nav.roadmap}</a>
-          </nav>
+          {/* LEFT: MENU (MOBILE) / NAV (DESKTOP) */}
+          <div className="header-left">
+            <button className="mobile-only btn-menu" onClick={() => setIsMenuOpen(true)}>
+              <MoreHorizontal size={24} />
+            </button>
+            <nav className="nav desktop-only">
+              <a href="#about">{t.nav.about}</a>
+              <a href="#yield">{lang === 'RU' ? 'Доходность' : 'Yield'}</a>
+              <a href="#defi">DEFI</a>
+              <a href="#nft">{t.nav.nft}</a>
+            </nav>
+          </div>
 
-          {/* CENTER: LOGO & BRANDING */}
-          <div className="logo" onClick={() => setExpandedCoin('/logo-main.jpg')} style={{ cursor: 'pointer' }}>
+          {/* CENTER: BIG LOGO & BRANDING */}
+          <div className="logo-container" onClick={() => setExpandedCoin('/logo-main.jpg')} style={{ cursor: 'pointer' }}>
             <div className="logo-img-wrapper">
               <img src="/logo-main.jpg" alt="GBU Logo" />
             </div>
             <span className="pulsing-text">GRANITE BEAR UTILITY</span>
           </div>
 
-          {/* RIGHT: WALLET & MENU */}
+          {/* RIGHT: WALLET */}
           <div className="header-right">
             {isConnected && address && (
-              <div className="balance-wrapper">
+              <div
+                className="balance-wrapper desktop-only"
+                onClick={() => setIsDrawerOpen(true)}
+                style={{ cursor: 'pointer' }}
+              >
                 <div className="glass-card balance-tag">
                   {parseFloat(balance).toLocaleString()} GBU
                 </div>
-                <button onClick={addTokenToWallet} className="btn-add-token">+</button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); addTokenToWallet(); }}
+                  className="btn-add-token"
+                >
+                  +
+                </button>
               </div>
             )}
 
-            <button className="btn-primary pulse-wallet" onClick={() => open()}>
+            <button className="btn-primary" onClick={() => open()}>
               <Wallet size={16} />
               <span className="btn-text">
                 {isConnected && address ? `${address.slice(0, 4)}...${address.slice(-3)}` : t.connectWallet}
               </span>
-            </button>
-
-            <button className="btn-menu" onClick={() => setIsMenuOpen(true)}>
-              <MoreHorizontal size={20} />
             </button>
           </div>
         </div>
@@ -902,6 +999,142 @@ function App() {
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isDrawerOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsDrawerOpen(false)}
+              className="modal-overlay"
+              style={{ zIndex: 99999 }}
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              style={{
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: 100000,
+                background: 'rgba(10, 10, 25, 0.98)',
+                backdropFilter: 'blur(20px)',
+                borderTop: '1px solid rgba(255,255,255,0.1)',
+                borderTopLeftRadius: '24px',
+                borderTopRightRadius: '24px',
+                padding: '30px 20px',
+                maxHeight: '90vh',
+                overflowY: 'auto'
+              }}
+            >
+              <div style={{ width: '40px', height: '4px', background: 'rgba(255,255,255,0.2)', borderRadius: '2px', margin: '0 auto 20px' }} />
+
+              <div style={{ textAlign: 'center', marginBottom: '25px' }}>
+                <h3 style={{ fontSize: '1.2rem', color: 'var(--accent-red)' }}>{t.defi.sale.title}</h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{t.defi.sale.desc}</p>
+              </div>
+
+              <div className="glass-card" style={{ marginBottom: '20px', padding: '15px', textAlign: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{lang === 'RU' ? 'Ваш баланс:' : 'Your balance:'}</span>
+                  <button onClick={addTokenToWallet} className="btn-add-token" style={{ padding: '2px 8px', fontSize: '10px' }}>+ IMPORT GBU</button>
+                </div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-main)' }}>
+                  {parseFloat(balance).toLocaleString()} GBU
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '25px' }}>
+                <label htmlFor="drawer-buy-amt" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>{t.defi.sale.inputLabel}</label>
+                <input
+                  id="drawer-buy-amt"
+                  type="number"
+                  value={purchaseAmt}
+                  onChange={(e) => setPurchaseAmt(Number(e.target.value))}
+                  placeholder="100"
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '15px', color: 'white', borderRadius: '12px', fontSize: '1.1rem' }}
+                />
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px', textAlign: 'center' }}>
+                  {t.defi.sale.rateInfo} | ~{(purchaseAmt / 905).toFixed(3)} AVAX
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <button
+                  onClick={handleBuyWithAvax}
+                  disabled={isBurning}
+                  className="btn-primary"
+                  style={{ width: '100%', height: '55px', justifyContent: 'center', fontSize: '1rem' }}
+                >
+                  <Zap size={20} style={{ marginRight: '8px' }} /> {isBurning ? 'Processing...' : t.defi.sale.buyAvax}
+                </button>
+                <button
+                  onClick={() => setIsDrawerOpen(false)}
+                  className="btn-bw"
+                  style={{ width: '100%', height: '50px' }}
+                >
+                  {lang === 'RU' ? 'Закрыть' : 'Close'}
+                </button>
+              </div>
+
+              {/* ADMIN PANEL INSIDE DRAWER */}
+              {saleStats.isOwner && (
+                <div className="glass-card" style={{ marginTop: '30px', border: '1px solid var(--accent-gold)', borderStyle: 'dashed' }}>
+                  <h3 style={{ fontSize: '0.9rem', color: 'var(--accent-gold)', marginBottom: '15px', textAlign: 'center' }}>
+                    {lang === 'RU' ? '🛠 ПАНЕЛЬ УПРАВЛЕНИЯ (ADMIN)' : '🛠 ADMIN CONTROL'}
+                  </h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
+                    <div style={{ textAlign: 'center', background: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '8px' }}>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>AVAX Profit</div>
+                      <div style={{ fontWeight: 'bold' }}>{saleStats.avaxBalance}</div>
+                    </div>
+                    <div style={{ textAlign: 'center', background: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '8px' }}>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Tokens in Reserve</div>
+                      <div style={{ fontWeight: 'bold' }}>{saleStats.gbuStored}</div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div>
+                        <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>AVAX Rate (GBU/1 AVAX)</label>
+                        <input
+                          type="number"
+                          value={newAvaxRate}
+                          onChange={(e) => setNewAvaxRate(Number(e.target.value))}
+                          style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px', marginTop: '4px' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>USDT Rate (GBU/1 USDT)</label>
+                        <input
+                          type="number"
+                          value={newUsdtRate}
+                          onChange={(e) => setNewUsdtRate(Number(e.target.value))}
+                          style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px', marginTop: '4px' }}
+                        />
+                      </div>
+                    </div>
+
+                    <button onClick={handleUpdateRates} className="btn-gold" style={{ width: '100%', padding: '12px', fontSize: '0.8rem' }}>
+                      UPDATE RATES
+                    </button>
+
+                    <button onClick={handleWithdrawFunds} className="btn-primary" style={{ width: '100%', padding: '12px', fontSize: '0.8rem', background: '#27ae60' }}>
+                      WITHDRAW ALL PROFITS
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
