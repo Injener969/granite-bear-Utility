@@ -4,7 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, A
 import { Wallet, CheckCircle, BarChart3, X, MoreHorizontal, TrendingUp, Zap, Send, Mail } from 'lucide-react';
 import './index.css';
 import './modal.css';
-import { BrowserProvider, Contract, formatUnits } from 'ethers';
+import { BrowserProvider, Contract, formatUnits, parseEther } from 'ethers';
 import { createWeb3Modal, defaultConfig, useWeb3Modal, useWeb3ModalAccount, useWeb3ModalProvider } from '@web3modal/ethers/react';
 import { translations } from './translations';
 
@@ -62,7 +62,7 @@ createWeb3Modal({
 
 // OFFICIAL GBU MAINNET ADDRESS
 const GBU_ADDRESS: string = "0x1CE7d0BBB25008f2b6b7A1Cdc0c5A9BB7eDAb96D";
-const GBU_NFT_ADDRESS: string = "0xeAD975dA58aF3828238E2c88d2683fabc3A4d277";
+// const GBU_NFT_ADDRESS: string = "0xeAD975dA58aF3828238E2c88d2683fabc3A4d277";
 const GBU_SALE_ADDRESS: string = "0x5fE773c857cbFA9D0eAcF404B90C487F7fdcD5ec";
 const USDT_ADDRESS: string = "0x9702230a2441d44697590d48a91ed59151cf59c5";
 
@@ -192,10 +192,6 @@ function App() {
 
       // Check if owner and fetch stats
       if (address.toLowerCase() === "0x6c18c4ba7e3b4574dd70e2c2a81b0a18321d039f") {
-        const saleABI = [
-          "function avaxRate() view returns (uint256)",
-          "function usdtRate() view returns (uint256)"
-        ];
         const usdtABI = ["function balanceOf(address) view returns (uint256)"];
 
         const avaxBal = await provider.getBalance(GBU_SALE_ADDRESS);
@@ -258,7 +254,7 @@ function App() {
 
       // Calculate AVAX spent based on 905 rate
       const avaxSpent = (purchaseAmt / 905).toFixed(18);
-      const tx = await saleContract.buyWithAvax({ value: ethers.parseEther(avaxSpent) });
+      const tx = await saleContract.buyWithAvax({ value: parseEther(avaxSpent) });
       setBurnTxHash(tx.hash);
       await tx.wait();
       updateBalance();
