@@ -1088,15 +1088,15 @@ function App() {
               {saleStats.isOwner && (
                 <div className="glass-card" style={{ marginTop: '30px', border: '1px solid var(--accent-gold)', borderStyle: 'dashed' }}>
                   <h3 style={{ fontSize: '0.9rem', color: 'var(--accent-gold)', marginBottom: '15px', textAlign: 'center' }}>
-                    {lang === 'RU' ? '🛠 ПАНЕЛЬ УПРАВЛЕНИЯ (ADMIN)' : '🛠 ADMIN CONTROL'}
+                    {t.defi.sale.admin.title}
                   </h3>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
                     <div style={{ textAlign: 'center', background: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '8px' }}>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>AVAX Profit</div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t.defi.sale.admin.profitAvax}</div>
                       <div style={{ fontWeight: 'bold' }}>{saleStats.avaxBalance}</div>
                     </div>
                     <div style={{ textAlign: 'center', background: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '8px' }}>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Tokens in Reserve</div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t.defi.sale.admin.reservesGbu}</div>
                       <div style={{ fontWeight: 'bold' }}>{saleStats.gbuStored}</div>
                     </div>
                   </div>
@@ -1104,7 +1104,7 @@ function App() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                       <div>
-                        <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>AVAX Rate (GBU/1 AVAX)</label>
+                        <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{t.defi.sale.admin.rateAvaxLabel}</label>
                         <input
                           type="number"
                           value={newAvaxRate}
@@ -1113,7 +1113,7 @@ function App() {
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>USDT Rate (GBU/1 USDT)</label>
+                        <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{t.defi.sale.admin.rateUsdtLabel}</label>
                         <input
                           type="number"
                           value={newUsdtRate}
@@ -1124,11 +1124,11 @@ function App() {
                     </div>
 
                     <button onClick={handleUpdateRates} className="btn-gold" style={{ width: '100%', padding: '12px', fontSize: '0.8rem' }}>
-                      UPDATE RATES
+                      {t.defi.sale.admin.btnUpdate}
                     </button>
 
                     <button onClick={handleWithdrawFunds} className="btn-primary" style={{ width: '100%', padding: '12px', fontSize: '0.8rem', background: '#27ae60' }}>
-                      WITHDRAW ALL PROFITS
+                      {t.defi.sale.admin.btnWithdraw}
                     </button>
                   </div>
                 </div>

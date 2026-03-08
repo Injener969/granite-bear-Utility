@@ -120,7 +120,16 @@ export const translations = {
                 desc: "Официальный смарт-контракт для покупки GBU напрямую за AVAX.",
                 inputLabel: "Сумма покупки (токенов):",
                 rateInfo: "Цена: $0.06 | Курс GBU/AVAX: 905",
-                buyAvax: "КУПИТЬ GBU (AVAX)"
+                buyAvax: "КУПИТЬ GBU (AVAX)",
+                admin: {
+                    title: "🛠 ПАНЕЛЬ УПРАВЛЕНИЯ (ADMIN)",
+                    profitAvax: "Прибыль (AVAX)",
+                    reservesGbu: "В резерве (GBU)",
+                    rateAvaxLabel: "Курс AVAX (GBU за 1 AVAX)",
+                    rateUsdtLabel: "Курс USDT (GBU за 1 USDT)",
+                    btnUpdate: "ОБНОВИТЬ КУРСЫ",
+                    btnWithdraw: "ВЫВЕСТИ ВСЮ ПРИБЫЛЬ"
+                }
             }
         },
         footer: {
@@ -318,7 +327,16 @@ export const translations = {
                 desc: "Official smart-contract for direct GBU purchase using AVAX.",
                 inputLabel: "Purchase Amount (tokens):",
                 rateInfo: "Price: $0.06 | GBU/AVAX rate: 905",
-                buyAvax: "BUY GBU (AVAX)"
+                buyAvax: "BUY GBU (AVAX)",
+                admin: {
+                    title: "🛠 ADMIN CONTROL PANEL",
+                    profitAvax: "Profit (AVAX)",
+                    reservesGbu: "Stored (GBU)",
+                    rateAvaxLabel: "AVAX Rate (GBU per 1 AVAX)",
+                    rateUsdtLabel: "USDT Rate (GBU per 1 USDT)",
+                    btnUpdate: "UPDATE RATES",
+                    btnWithdraw: "WITHDRAW ALL PROFITS"
+                }
             }
         },
         footer: {
