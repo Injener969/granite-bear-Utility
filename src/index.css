@@ -308,6 +308,7 @@ h6 {
   text-transform: uppercase;
   color: var(--text-muted);
   transition: 0.2s;
+  white-space: nowrap;
 }
 
 .nav a:hover {
