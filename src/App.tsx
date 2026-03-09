@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, AreaChart, Area, XAxis, YAxis } from 'recharts';
 import { Wallet, CheckCircle, BarChart3, X, MoreHorizontal, TrendingUp, Zap, Send, Mail } from 'lucide-react';
 import './index.css';
-import './modal.css';
 import { BrowserProvider, Contract, formatUnits, parseEther } from 'ethers';
 import { createWeb3Modal, defaultConfig, useWeb3Modal, useWeb3ModalAccount, useWeb3ModalProvider } from '@web3modal/ethers/react';
 import { translations } from './translations';
