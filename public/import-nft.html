@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import GBU NFTs</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #050510;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 400px;
+        }
+        button {
+            background: #d4af37;
+            color: black;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        button:disabled {
+            background: #555;
+            color: #888;
+            cursor: not-allowed;
+            transform: none;
+        }
+        #status {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>GBU NFT Importer</h2>
+        <p>1. Connect your Bitget Wallet</p>
+        <button id="connectBtn">Connect Wallet</button>
+        
+        <p style="margin-top: 30px;">2. Add Network & Import</p>
+        <button id="importBtn" disabled>Import NFTs to Wallet</button>
+        
+        <div id="status">Waiting for connection...</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+    <script>
+        const AVAX_CHAIN_ID = '0xa86a'; // 43114 in hex
+        const NFT_ADDRESS = "0xeAD975dA58aF3828238E2c88d2683fabc3A4d277";
+        let userAddress = null;
+
+        const connectBtn = document.getElementById('connectBtn');
+        const importBtn = document.getElementById('importBtn');
+        const statusEl = document.getElementById('status');
+
+        async function connect() {
+            if (typeof window.ethereum === 'undefined') {
+                statusEl.innerText = "Error: No Web3 wallet found. Are you opening this inside Bitget browser?";
+                return;
+            }
+
+            try {
+                statusEl.innerText = "Connecting...";
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                userAddress = accounts[0];
+                
+                statusEl.innerHTML = `Connected: ${userAddress.substring(0,6)}...${userAddress.substring(38)}<br>Checking network...`;
+                
+                // Force Avalanche Network
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: AVAX_CHAIN_ID }],
+                    });
+                    statusEl.innerText = "Connected to Avalanche C-Chain!";
+                    importBtn.disabled = false;
+                } catch (switchError) {
+                    // This error code indicates that the chain has not been added to MetaMask.
+                    if (switchError.code === 4902) {
+                        try {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [
+                                    {
+                                        chainId: AVAX_CHAIN_ID,
+                                        chainName: 'Avalanche C-Chain',
+                                        rpcUrls: ['https://api.avax.network/ext/bc/C/rpc'],
+                                        nativeCurrency: {
+                                            name: 'Avalanche',
+                                            symbol: 'AVAX',
+                                            decimals: 18
+                                        },
+                                        blockExplorerUrls: ['https://snowtrace.io/']
+                                    }
+                                ]
+                            });
+                            statusEl.innerText = "Avalanche Network Added!";
+                            importBtn.disabled = false;
+                        } catch (addError) {
+                            statusEl.innerText = "Failed to add Avalanche network.";
+                            console.error(addError);
+                        }
+                    } else {
+                        statusEl.innerText = "Failed to switch to Avalanche.";
+                        console.error(switchError);
+                    }
+                }
+            } catch (err) {
+                statusEl.innerText = "Connection failed: " + err.message;
+            }
+        }
+
+        async function importNFTs() {
+            statusEl.innerText = "Watch your wallet popups...";
+            importBtn.disabled = true;
+
+            const ids = ["1", "2", "3"];
+            let successCount = 0;
+
+            for (const id of ids) {
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_watchAsset',
+                        params: {
+                            type: 'ERC721',
+                            options: {
+                                address: NFT_ADDRESS,
+                                tokenId: id,
+                                symbol: 'GBU', // Optional
+                                decimals: 0    // Options
+                            },
+                        },
+                    });
+                    successCount++;
+                    statusEl.innerText = `Added NFT ID ${id}. Waiting for next...`;
+                } catch (error) {
+                    console.error("Failed to add NFT ID", id, error);
+                }
+                
+                // Wait briefly between prompts so wallet doesn't crash
+                await new Promise(r => setTimeout(r, 1000));
+            }
+
+            statusEl.innerText = `Finished! Prompts requested for ${successCount}/3 NFTs.`;
+            importBtn.disabled = false;
+        }
+
+        connectBtn.addEventListener('click', connect);
+        importBtn.addEventListener('click', importNFTs);
+    </script>
+</body>
+</html>
