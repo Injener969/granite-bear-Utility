@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://granite-bear.vercel.app/sitemap.xml
