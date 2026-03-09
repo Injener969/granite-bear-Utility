@@ -632,10 +632,10 @@ function App() {
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '10px 0 20px' }}>{t.defi.buyDesc}</p>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <a href={`https://traderjoexyz.com/avalanche/trade?outputCurrency=${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                  <a href={`https://traderjoexyz.com/avalanche/trade?outputCurrency=${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ width: '100%', justifyContent: 'center', borderRadius: '50px', overflow: 'hidden' }}>
                     <TrendingUp size={18} style={{ marginRight: '8px' }} /> TraderJoe (DEX)
                   </a>
-                  <a href={`https://dexscreener.com/avalanche/${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-social" style={{ width: '100%', justifyContent: 'center' }}>
+                  <a href={`https://dexscreener.com/avalanche/${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-social" style={{ width: '100%', justifyContent: 'center', borderRadius: '50px', overflow: 'hidden' }}>
                     <BarChart3 size={18} style={{ marginRight: '8px' }} /> {t.defi.buyAnalytics}
                   </a>
                 </div>
@@ -649,7 +649,7 @@ function App() {
                     Смарт-контракт GBU имеет открытый исходный код и подтвержден в сети Avalanche. Полный аудит и статистика в реальном времени.
                   </p>
                 </div>
-                <a href={`https://snowtrace.io/token/${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-social" style={{ width: '100%', borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)', justifyContent: 'center' }}>
+                <a href={`https://snowtrace.io/token/${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-social" style={{ width: '100%', borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)', justifyContent: 'center', borderRadius: '50px', overflow: 'hidden' }}>
                   Посмотреть на Snowtrace
                 </a>
               </div>
