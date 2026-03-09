@@ -140,8 +140,8 @@ export const translations = {
             terms: "Пользовательское соглашение",
             privacy: "Политика конфиденциальности",
             social: {
-                telegram: "https://t.me/gbu_official",
-                twitter: "https://x.com/gbu_official",
+                telegram: "https://t.me/GraniteBear",
+                twitter: "https://x.com/InjenerKarelin",
                 email: "mailto:support@granite-bear.com"
             }
         },
@@ -347,8 +347,8 @@ export const translations = {
             terms: "Terms of Service",
             privacy: "Privacy Policy",
             social: {
-                telegram: "https://t.me/gbu_official",
-                twitter: "https://x.com/gbu_official",
+                telegram: "https://t.me/GraniteBear",
+                twitter: "https://x.com/InjenerKarelin",
                 email: "mailto:support@granite-bear.com"
             }
         },
