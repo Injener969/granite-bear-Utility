@@ -558,7 +558,8 @@ function App() {
 
       {/* DEFI HUB */}
       <section id="defi" className="section container">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
+        {/* Removed motion.div animation, made it static */}
+        <div>
           <div style={{ textAlign: 'center', marginBottom: '30px' }}>
             <h2 style={{ marginBottom: '5px' }}>
               <span className="tokenomics-text-gradient">{t.defi.title}</span>
@@ -566,8 +567,9 @@ function App() {
             <p style={{ color: 'var(--text-muted)', maxWidth: '700px', margin: '0 auto', fontSize: '0.9rem' }}>{t.defi.subtitle}</p>
           </div>
 
-          <div className="defi-grid">
-            <div className="glass-card atmos-glow" style={{ padding: '30px' }}>
+          <div className="defi-grid" style={{ alignItems: 'stretch' }}>
+            {/* Chart Block - Transparent with bottom glow */}
+            <div className="defi-transparent-card" style={{ padding: '30px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
                 <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{t.defi.chartTitle}</h3>
                 <div className="live-indicator">
@@ -621,10 +623,14 @@ function App() {
               </div>
             </div>
 
-            <div className="defi-actions">
-              <div className="glass-card feature-card-glow atmos-glow" style={{ marginBottom: '20px' }}>
-                <h3 style={{ fontSize: '1rem', color: 'var(--accent-red)' }}>{t.defi.buyTitle}</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '10px 0 20px' }}>{t.defi.buyDesc}</p>
+            {/* Right Column with two equal blocks */}
+            <div className="defi-actions-column">
+              {/* Buy Block */}
+              <div className="defi-transparent-card defi-sub-card" style={{ padding: '20px' }}>
+                <div>
+                  <h3 style={{ fontSize: '1rem', color: 'var(--accent-red)', marginTop: 0 }}>{t.defi.buyTitle}</h3>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '10px 0 20px' }}>{t.defi.buyDesc}</p>
+                </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <a href={`https://traderjoexyz.com/avalanche/trade?outputCurrency=${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
                     <TrendingUp size={18} style={{ marginRight: '8px' }} /> TraderJoe (DEX)
@@ -635,27 +641,33 @@ function App() {
                 </div>
               </div>
 
-              <div className="glass-card feature-card-glow atmos-glow">
-                <h3 style={{ fontSize: '1rem', color: 'var(--accent-gold)' }}>{t.defi.liquidityTitle}</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '10px 0 20px' }}>{t.defi.liquidityDesc}</p>
-                <a href={`https://traderjoexyz.com/avalanche/pool/v21/AVAX/${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-social" style={{ width: '100%', borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)', justifyContent: 'center' }}>
-                  Add GBU/AVAX LP
+              {/* Option A: Transparency Block */}
+              <div className="defi-transparent-card defi-sub-card" style={{ padding: '20px' }}>
+                <div>
+                  <h3 style={{ fontSize: '1rem', color: 'var(--accent-gold)', marginTop: 0 }}>Прозрачность контракта</h3>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '10px 0 20px' }}>
+                    Смарт-контракт GBU имеет открытый исходный код и подтвержден в сети Avalanche. Полный аудит и статистика в реальном времени.
+                  </p>
+                </div>
+                <a href={`https://snowtrace.io/token/${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-social" style={{ width: '100%', borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)', justifyContent: 'center' }}>
+                  Посмотреть на Snowtrace
                 </a>
               </div>
 
-              <div className="defi-stats-mini" style={{ marginTop: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                <div className="glass-card" style={{ padding: '15px', textAlign: 'center' }}>
+              {/* Stats Grid */}
+              <div className="defi-stats-mini" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div className="defi-transparent-card" style={{ padding: '15px', textAlign: 'center' }}>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '5px' }}>{t.defi.stats.volume}</div>
                   <div style={{ fontWeight: '800', fontSize: '1rem' }}>${defiStats.volume24h.toLocaleString()}</div>
                 </div>
-                <div className="glass-card" style={{ padding: '15px', textAlign: 'center' }}>
+                <div className="defi-transparent-card" style={{ padding: '15px', textAlign: 'center' }}>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '5px' }}>{t.defi.stats.liquidity}</div>
                   <div style={{ fontWeight: '800', fontSize: '1rem' }}>${(defiStats.liquidityUSD / 1000).toFixed(1)}k+</div>
                 </div>
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* LOYALTY */}
