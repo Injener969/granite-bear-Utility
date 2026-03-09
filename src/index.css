@@ -82,7 +82,7 @@ h6 {
   padding: 10px 24px;
   font-family: var(--font-heading);
   font-weight: 700;
-  border-radius: 50px;
+  border-radius: 50px !important;
   cursor: pointer;
   transition: all 0.2s ease;
   text-transform: uppercase;
@@ -99,7 +99,7 @@ h6 {
 
 .btn-social {
   padding: 10px 24px;
-  border-radius: 50px;
+  border-radius: 50px !important;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.15);
   display: flex;
