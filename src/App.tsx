@@ -461,8 +461,8 @@ function App() {
             )}
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '4px', textAlign: 'center', letterSpacing: '0.05em' }}>
-                ПРЯМОЙ ОБМЕН: AVAX | USDT (Avalanche)
+              <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', marginBottom: '5px', textAlign: 'center', letterSpacing: '0.02em', maxWidth: '160px', lineHeight: '1.2' }}>
+                Прямой обмен Avax, USDT / GBU Avalanche C Chain
               </span>
               <button className="btn-primary" onClick={() => open()} style={{ width: '100%' }}>
                 <Wallet size={16} />
