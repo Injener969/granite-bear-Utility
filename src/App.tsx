@@ -788,58 +788,102 @@ function App() {
       </section >
 
       {/* NFT */}
-      < section id="nft" className="section container" >
+      <section id="nft" className="section container">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
-          <div className="nft-section-layout">
-            {/* CARDS FIRST (LEFT) */}
-            <div className="nft-cards-container" style={{ display: 'flex', justifyContent: 'center' }}>
-              <div className="glass-card nft-neon-glow" style={{ width: '520px', padding: '25px', position: 'relative' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '15px' }}>
-                  <div className="clickable-coin" onClick={() => setExpandedCoin('/coin-3.jpg')} style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
-                    <img src="/coin-3.jpg" alt="GBU Silver NFT" style={{ width: '100%', height: 'auto', display: 'block' }} />
-                  </div>
-                  <div className="clickable-coin" onClick={() => setExpandedCoin('/coin-1.jpg')} style={{ borderRadius: '8px', overflow: 'hidden', border: '2px solid var(--accent-gold)', transform: 'scale(1.1)', boxShadow: '0 0 20px rgba(255,194,51,0.2)' }}>
-                    <img src="/coin-1.jpg" alt="GBU Gold NFT" style={{ width: '100%', height: 'auto', display: 'block' }} />
-                  </div>
-                  <div className="clickable-coin" onClick={() => setExpandedCoin('/coin-2.jpg')} style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
-                    <img src="/coin-2.jpg" alt="GBU Bronze NFT" style={{ width: '100%', height: 'auto', display: 'block' }} />
+          <div className="nft-centered-layout">
+            
+            <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+              <h2 style={{ color: 'var(--accent-gold)', marginBottom: '15px', textShadow: '0 0 20px rgba(255,194,51,0.3)' }}>CLUB GBU NFT</h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Владение NFT — ваша прямая привилегия в экосистеме GBU.</p>
+            </div>
+
+            {/* CARDS CONTAINER */}
+            <div className="glass-card nft-neon-glow" style={{ width: '100%', maxWidth: '700px', padding: '25px', position: 'relative', marginBottom: '30px', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(160px, 1fr))', gap: '15px', marginBottom: '15px', minWidth: '500px' }}>
+                
+                {/* SILVER CARD */}
+                <div className="flip-card">
+                  <div className="flip-card-inner">
+                    <div className="flip-card-front">
+                      <img src="/coin-3.jpg" alt="GBU Silver NFT" />
+                    </div>
+                    <div className="flip-card-back flip-card-back-silver">
+                      <div className="flip-title silver-text">Silver Tier</div>
+                      <div className="flip-discount silver-text">10% OFF</div>
+                      <ul className="flip-perks">
+                        <li>Продвинутый статус</li>
+                        <li><span style={{ color: '#00ff88' }}>+10% APY</span> Буст</li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
-                <div style={{ textAlign: 'center' }}>
-                  <h3 style={{ color: '#fff', fontSize: '1rem', margin: '10px 0 5px' }}>{t.nft.title}</h3>
-                  <p style={{ color: 'var(--accent-gold)', fontSize: '0.75rem', fontWeight: 'bold' }}>EXCLUSTIVE B2B ACCESS</p>
+
+                {/* GOLD CARD */}
+                <div className="flip-card" style={{ transform: 'scale(1.05)', zIndex: 2 }}>
+                  <div className="flip-card-inner">
+                    <div className="flip-card-front" style={{ border: '2px solid var(--accent-gold)' }}>
+                      <img src="/coin-1.jpg" alt="GBU Gold NFT" />
+                    </div>
+                    <div className="flip-card-back flip-card-back-gold">
+                      <div className="flip-title gold-text">Gold Tier</div>
+                      <div className="flip-discount gold-text">15% OFF</div>
+                      <ul className="flip-perks">
+                        <li>Высшая привилегия</li>
+                        <li><span style={{ color: '#00ff88' }}>+15% APY</span> Буст</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
+
+                {/* BRONZE CARD */}
+                <div className="flip-card">
+                  <div className="flip-card-inner">
+                    <div className="flip-card-front">
+                      <img src="/coin-2.jpg" alt="GBU Bronze NFT" />
+                    </div>
+                    <div className="flip-card-back flip-card-back-bronze">
+                      <div className="flip-title bronze-text">Bronze Tier</div>
+                      <div className="flip-discount bronze-text">5% OFF</div>
+                      <ul className="flip-perks">
+                        <li>Базовый статус</li>
+                        <li><span style={{ color: '#00ff88' }}>+5% APY</span> Буст</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ color: 'var(--accent-gold)', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Наведите на карту (Tap), чтобы увидеть детали</p>
               </div>
             </div>
 
-            {/* TEXT SECOND (RIGHT) */}
-            <div className="nft-text-container" style={{ minWidth: '300px' }}>
-              <h2 style={{ color: 'var(--accent-gold)', marginBottom: '40px', textShadow: '0 0 20px rgba(255,194,51,0.3)' }}>{t.nft.title}</h2>
-              <p style={{ color: 'var(--text-muted)', marginBottom: '30px' }}>{t.nft.subtitle}</p>
-              <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                {t.nft.benefits.map((b, i) => (
-                  <li key={i} style={{ display: 'flex', gap: '10px' }}><CheckCircle color="var(--accent-gold)" size={20} /> {b}</li>
-                ))}
+            {/* TEXT & ACTION BUTTONS */}
+            <div className="nft-text-container">
+              <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', marginBottom: '40px' }}>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-muted)' }}><CheckCircle color="var(--accent-gold)" size={20} /> Пожизненная скидка до 15% на гранит</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-muted)' }}><CheckCircle color="var(--accent-gold)" size={20} /> Ускоренный фарминг токенов GBU</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-muted)' }}><CheckCircle color="var(--accent-gold)" size={20} /> Статус участника закрытого комьюнити</li>
               </ul>
-              {waitlistStatus === 'idle' ? (
-                <form onSubmit={handleWaitlistSubmit} style={{ display: 'flex', gap: '10px', marginTop: '40px', flexWrap: 'wrap' }}>
-                  <input
-                    type="text"
-                    value={waitlistEmail}
-                    onChange={(e) => setWaitlistEmail(e.target.value)}
-                    placeholder={t.nft.waitlist.placeholder}
-                    required
-                    style={{ flex: 1, minWidth: '200px', padding: '12px 20px', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.6)', color: 'white', outline: 'none', fontFamily: 'inherit' }}
-                  />
-                  <button type="submit" className="btn-gold">{t.nft.waitlist.submit}</button>
-                </form>
-              ) : (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ padding: '12px 20px', background: 'rgba(212, 175, 55, 0.1)', color: 'var(--accent-gold)', borderRadius: '8px', border: '1px solid rgba(212, 175, 55, 0.3)', display: 'inline-block', marginTop: '40px' }}>
-                  <CheckCircle size={18} style={{ verticalAlign: 'middle', marginRight: '8px', marginTop: '-2px' }} />
-                  {t.nft.waitlist.success}
-                </motion.div>
-              )}
+
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
+                {!isConnected ? (
+                  <button className="btn-primary" onClick={() => open()} style={{ minWidth: '220px', padding: '15px' }}>
+                    <Wallet size={18} style={{ marginRight: '8px' }}/> Connect Wallet
+                  </button>
+                ) : (
+                  <div className="glass-card" style={{ minWidth: '220px', padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--accent-gold)' }}>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Wallet Connected:</span>
+                    <span style={{ fontWeight: 'bold', color: 'var(--accent-gold)', marginLeft: '10px' }}>{address?.slice(0, 4)}...{address?.slice(-4)}</span>
+                  </div>
+                )}
+                
+                <a href="https://opensea.io/" target="_blank" rel="noopener noreferrer" className="btn-emerald" style={{ minWidth: '220px', padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', borderRadius: '8px' }}>
+                  Go to Marketplace
+                </a>
+              </div>
             </div>
+
           </div>
         </motion.div>
       </section>
