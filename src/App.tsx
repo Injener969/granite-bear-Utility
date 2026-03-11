@@ -461,7 +461,7 @@ function App() {
             )}
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', marginBottom: '5px', textAlign: 'center', letterSpacing: '0.02em', maxWidth: '160px', lineHeight: '1.2' }}>
+              <span style={{ fontSize: '0.6rem', color: '#81c784', marginBottom: '5px', textAlign: 'center', letterSpacing: '0.02em', maxWidth: '160px', lineHeight: '1.2' }}>
                 Прямой обмен Avax, USDT / GBU Avalanche C Chain
               </span>
               <button className="btn-primary" onClick={() => open()} style={{ width: '100%' }}>
