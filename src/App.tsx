@@ -64,9 +64,7 @@ const GBU_ADDRESS: string = "0x1CE7d0BBB25008f2b6b7A1Cdc0c5A9BB7eDAb96D";
 const GBU_SALE_ADDRESS: string = "0x5fE773c857cbFA9D0eAcF404B90C487F7fdcD5ec";
 const USDT_ADDRESS: string = "0x9702230a2441d44697590d48a91ed59151cf59c5";
 
-// TELEGRAM NOTIFICATION CONFIG
-const TG_BOT_TOKEN = "2037028003:AAFOo38E9a7AXFwsocxP-WWYphQFMLr_pQc";
-const TG_CHAT_ID = "538008147";
+// TELEGRAM NOTIFICATION CONFIG REMOVED
 const GBU_ABI = [
   "function balanceOf(address owner) view returns (uint256)",
   "function decimals() view returns (uint8)",
@@ -92,8 +90,6 @@ function App() {
   const [purchaseAmt, setPurchaseAmt] = useState(500);
   const [scrolled, setScrolled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [waitlistEmail, setWaitlistEmail] = useState('');
-  const [waitlistStatus, setWaitlistStatus] = useState<'idle' | 'success'>('idle');
   const [expandedCoin, setExpandedCoin] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -369,31 +365,6 @@ function App() {
 
   const discountInfo = getDiscountData(purchaseAmt);
 
-  const handleWaitlistSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!waitlistEmail) return;
-
-    try {
-      const text = `🚨 *Новая заявка в GBU NFT Club!*\n\n📧 Контакт: ${waitlistEmail}\n👤 Кошелек: ${address || 'Не подключен'}`;
-
-      await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: TG_CHAT_ID,
-          text: text,
-          parse_mode: 'Markdown'
-        })
-      });
-
-      setWaitlistStatus('success');
-    } catch (err) {
-      console.error("Telegram delivery failed:", err);
-      // Fallback to local success so user isn't blocked
-      setWaitlistStatus('success');
-    }
-  };
-
   return (
     <div className="app">
       <div className="bg-universe"></div>
@@ -425,11 +396,11 @@ function App() {
           <div className="header-right">
             {isConnected && address && (
               <div
-                className="balance-wrapper desktop-only"
+                className="balance-wrapper"
                 onClick={() => setIsDrawerOpen(true)}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
               >
-                <div className="glass-card balance-tag">
+                <div className="glass-card balance-tag" style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
                   {parseFloat(balance).toLocaleString()} GBU
                 </div>
                 <button
