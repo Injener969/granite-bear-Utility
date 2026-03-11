@@ -31,7 +31,7 @@ const mainnet = {
 const metadata = {
   name: 'Granite Bear Utility',
   description: 'GBU RWA Utility Token Program',
-  url: 'https://granite-bear.vercel.app',
+  url: 'https://gbutoken.xyz',
   icons: [`https://${window.location.host}/logo-main.jpg`]
 };
 

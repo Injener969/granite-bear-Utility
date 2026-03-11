@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Allow: /dapp
 
-Sitemap: https://granite-bear-utility.vercel.app/sitemap.xml
+Sitemap: https://gbutoken.xyz/sitemap.xml
