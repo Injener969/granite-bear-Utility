@@ -142,7 +142,7 @@ export const translations = {
             social: {
                 telegram: "https://t.me/GraniteBear",
                 twitter: "https://x.com/InjenerKarelin",
-                email: "mailto:support@granite-bear.com"
+                email: "mailto:admin@gbutoken.xyz"
             }
         },
         whitepaperModal: {
@@ -349,7 +349,7 @@ export const translations = {
             social: {
                 telegram: "https://t.me/GraniteBear",
                 twitter: "https://x.com/InjenerKarelin",
-                email: "mailto:support@granite-bear.com"
+                email: "mailto:admin@gbutoken.xyz"
             }
         },
         whitepaperModal: {
