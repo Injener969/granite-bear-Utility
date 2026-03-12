@@ -121,6 +121,11 @@ export const translations = {
                 inputLabel: "Сумма покупки (токенов):",
                 rateInfo: "Цена: $0.06 | Курс GBU/AVAX: 905",
                 buyAvax: "КУПИТЬ GBU (AVAX)",
+                disconnect: "ОТКЛЮЧИТЬ КОШЕЛЕК",
+                successTitle: "ОПЛАТА ПРОШЛА УСПЕШНО!",
+                buySuccess: "Вы успешно приобрели токены GBU. Они скоро появятся в вашем кошельке.",
+                viewOnExplorer: "Посмотреть транзакцию",
+                backToSite: "ВЕРНУТЬСЯ НА САЙТ",
                 admin: {
                     title: "🛠 ПАНЕЛЬ УПРАВЛЕНИЯ (ADMIN)",
                     profitAvax: "Прибыль (AVAX)",
@@ -328,6 +333,11 @@ export const translations = {
                 inputLabel: "Purchase Amount (tokens):",
                 rateInfo: "Price: $0.06 | GBU/AVAX rate: 905",
                 buyAvax: "BUY GBU (AVAX)",
+                disconnect: "DISCONNECT WALLET",
+                successTitle: "PURCHASE SUCCESSFUL!",
+                buySuccess: "You have successfully purchased GBU tokens. They will appear in your wallet shortly.",
+                viewOnExplorer: "View Transaction",
+                backToSite: "BACK TO SITE",
                 admin: {
                     title: "🛠 ADMIN CONTROL PANEL",
                     profitAvax: "Profit (AVAX)",

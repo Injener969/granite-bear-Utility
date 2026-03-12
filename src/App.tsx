@@ -100,6 +100,9 @@ function App() {
   const [expandedCoin, setExpandedCoin] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [purchaseStatus, setPurchaseStatus] = useState<'idle' | 'processing' | 'success'>('idle');
+  const [purchaseTxHash, setPurchaseTxHash] = useState('');
+  const [purchaseDetails, setPurchaseDetails] = useState({ gbu: 0, cost: 0, currency: 'AVAX' });
 
   // Web3 State using Modal hooks
   const { open } = useWeb3Modal();
@@ -247,54 +250,83 @@ function App() {
   };
 
   const handleBuyWithAvax = async () => {
-    if (!walletProvider || !purchaseAmt) return;
-    setIsBurning(true); // Reusing isBurning for loading state
+    if (!isConnected || !walletProvider || !address) {
+      open();
+      return;
+    }
+
     try {
+      setIsBurning(true);
+      setPurchaseStatus('processing');
       const provider = new BrowserProvider(walletProvider);
       const signer = await provider.getSigner();
-      const saleContract = new Contract(GBU_SALE_ADDRESS, ["function buyWithAvax() public payable"], signer);
+      const saleContract = new Contract(GBU_SALE_ADDRESS, GBU_SALE_ABI, signer);
 
-      // Calculate AVAX spent based on 905 rate
-      const avaxSpent = (purchaseAmt / newAvaxRate).toFixed(18);
-      const tx = await saleContract.buyWithAvax({ value: parseEther(avaxSpent) });
-      setBurnTxHash(tx.hash);
+      const amountGBU = BigInt(Math.floor(purchaseAmt * 1e18));
+      const costAvax = await saleContract.getAmountIn(amountGBU);
+
+      const tx = await saleContract.buyWithAvax(amountGBU, { value: costAvax });
+      setPurchaseTxHash(tx.hash);
       await tx.wait();
+
+      setPurchaseDetails({ 
+        gbu: purchaseAmt, 
+        cost: Number(formatUnits(costAvax, 18)), 
+        currency: 'AVAX' 
+      });
+      setPurchaseStatus('success');
+
       updateBalance();
-      alert(lang === 'RU' ? "Покупка успешно завершена!" : "Purchase successful!");
-    } catch (err) {
-      console.error("Buy failed:", err);
+    } catch (err: any) {
+      console.error("Buy error:", err);
+      alert(err.reason || err.message || "Transaction failed");
+      setPurchaseStatus('idle');
     } finally {
       setIsBurning(false);
     }
   };
 
   const handleBuyWithUsdt = async () => {
-    if (!walletProvider || !purchaseAmt) return;
-    setIsBurning(true);
+    if (!isConnected || !walletProvider || !address) {
+      open();
+      return;
+    }
+
     try {
+      setIsBurning(true);
+      setPurchaseStatus('processing');
       const provider = new BrowserProvider(walletProvider);
       const signer = await provider.getSigner();
-      
+
       const usdtContract = new Contract(USDT_ADDRESS, USDT_ABI, signer);
-      const saleContract = new Contract(GBU_SALE_ADDRESS, ["function buyWithUsdt(uint256 usdtAmount) public"], signer);
+      const saleContract = new Contract(GBU_SALE_ADDRESS, GBU_SALE_ABI, signer);
 
-      // USDT has 6 decimals, calculate amount to spend based on rate
-      const usdtSpent = (purchaseAmt / newUsdtRate).toFixed(6);
-      const parsedUsdtAmount = parseUnits(usdtSpent, 6);
+      const amountGBU = BigInt(Math.floor(purchaseAmt * 1e18));
+      const costUsdt = await saleContract.getAmountInUsdt(amountGBU);
 
-      // 1. Approve USDT Spend
-      const approveTx = await usdtContract.approve(GBU_SALE_ADDRESS, parsedUsdtAmount);
-      await approveTx.wait();
+      // Check allowance
+      const allowance = await usdtContract.allowance(address, GBU_SALE_ADDRESS);
+      if (allowance < costUsdt) {
+        const approveTx = await usdtContract.approve(GBU_SALE_ADDRESS, costUsdt);
+        await approveTx.wait();
+      }
 
-      // 2. Buy GBU with USDT
-      const buyTx = await saleContract.buyWithUsdt(parsedUsdtAmount);
-      setBurnTxHash(buyTx.hash);
-      await buyTx.wait();
+      const tx = await saleContract.buyWithUsdt(amountGBU);
+      setPurchaseTxHash(tx.hash);
+      await tx.wait();
+
+      setPurchaseDetails({ 
+        gbu: purchaseAmt, 
+        cost: Number(formatUnits(costUsdt, 6)), 
+        currency: 'USDT' 
+      });
+      setPurchaseStatus('success');
 
       updateBalance();
-      alert(lang === 'RU' ? "Покупка успешно завершена!" : "Purchase successful!");
-    } catch (err) {
-      console.error("USDT Buy failed:", err);
+    } catch (err: any) {
+      console.error("Buy error (USDT):", err);
+      alert(err.reason || err.message || "Transaction failed");
+      setPurchaseStatus('idle');
     } finally {
       setIsBurning(false);
     }
@@ -452,16 +484,28 @@ function App() {
               </div>
             )}
 
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.6rem', color: '#81c784', marginBottom: '5px', textAlign: 'center', letterSpacing: '0.02em', maxWidth: '160px', lineHeight: '1.2' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+              <span style={{ fontSize: '0.6rem', color: '#81c784', textAlign: 'center', letterSpacing: '0.02em', maxWidth: '160px', lineHeight: '1.2' }}>
                 Прямой обмен Avax, USDT / GBU Avalanche C Chain
               </span>
-              <button className="btn-primary" onClick={() => open()} style={{ width: '100%' }}>
-                <Wallet size={16} />
-                <span className="btn-text">
-                  {isConnected && address ? `${address.slice(0, 4)}...${address.slice(-3)}` : t.connectWallet}
-                </span>
-              </button>
+              <div style={{ display: 'flex', gap: '5px', width: '100%' }}>
+                <button className="btn-primary" onClick={() => open()} style={{ flex: 1 }}>
+                  <Wallet size={16} />
+                  <span className="btn-text" style={{ fontSize: '0.8rem' }}>
+                    {isConnected && address ? `${address.slice(0, 4)}...${address.slice(-3)}` : t.connectWallet}
+                  </span>
+                </button>
+                {isConnected && (
+                  <button 
+                    className="btn-bw" 
+                    onClick={() => open({ view: 'Account' })} 
+                    title={t.defi.sale.disconnect}
+                    style={{ padding: '0 10px', height: '40px' }}
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -1103,99 +1147,156 @@ function App() {
               <div style={{ width: '40px', height: '4px', background: 'rgba(255,255,255,0.2)', borderRadius: '2px', margin: '0 auto 20px' }} />
 
               <div style={{ textAlign: 'center', marginBottom: '25px' }}>
-                <h3 style={{ fontSize: '1.2rem', color: 'var(--accent-red)' }}>{t.defi.sale.title}</h3>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{t.defi.sale.desc}</p>
+                <h3 style={{ fontSize: '1.2rem', color: 'var(--accent-red)' }}>
+                  {purchaseStatus === 'success' ? t.defi.sale.successTitle : t.defi.sale.title}
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  {purchaseStatus === 'success' ? t.defi.sale.buySuccess : t.defi.sale.desc}
+                </p>
               </div>
 
-              <div className="glass-card" style={{ marginBottom: '20px', padding: '15px', textAlign: 'center' }}>
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{lang === 'RU' ? 'Ваш баланс:' : 'Your balance:'}</span>
-                  <button onClick={addTokenToWallet} className="btn-add-token" style={{ padding: '2px 8px', fontSize: '10px' }}>+ IMPORT GBU</button>
-                </div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-main)' }}>
-                  {parseFloat(balance).toLocaleString()} GBU
-                </div>
-              </div>
+              {purchaseStatus === 'success' ? (
+                /* SUCCESS VIEW */
+                <div style={{ textAlign: 'center', padding: '10px 0' }}>
+                  <div className="glass-card" style={{ padding: '25px', marginBottom: '25px', border: '1px solid #27ae60' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
+                      <CheckCircle size={55} color="#27ae60" />
+                    </div>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 'bold', marginBottom: '10px' }}>
+                      +{purchaseDetails.gbu.toLocaleString()} GBU
+                    </div>
+                    <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                      Cost: {purchaseDetails.cost.toFixed(4)} {purchaseDetails.currency}
+                    </div>
+                  </div>
 
-              <div style={{ marginBottom: '25px' }}>
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
-                  <button 
-                    onClick={() => setPaymentCurrency('AVAX')}
-                    style={{ 
-                      flex: 1, 
-                      padding: '10px', 
-                      borderRadius: '8px', 
-                      background: paymentCurrency === 'AVAX' ? 'rgba(232, 65, 66, 0.2)' : 'rgba(255,255,255,0.05)',
-                      border: `1px solid ${paymentCurrency === 'AVAX' ? 'var(--accent-red)' : 'transparent'}`,
-                      color: paymentCurrency === 'AVAX' ? 'white' : 'var(--text-muted)'
-                    }}>
-                    AVAX
-                  </button>
-                  <button 
-                    onClick={() => setPaymentCurrency('USDT')}
-                    style={{ 
-                      flex: 1, 
-                      padding: '10px', 
-                      borderRadius: '8px', 
-                      background: paymentCurrency === 'USDT' ? 'rgba(38, 161, 123, 0.2)' : 'rgba(255,255,255,0.05)',
-                      border: `1px solid ${paymentCurrency === 'USDT' ? '#26A17B' : 'transparent'}`,
-                      color: paymentCurrency === 'USDT' ? 'white' : 'var(--text-muted)'
-                    }}>
-                    USDT
-                  </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    <a 
+                      href={`https://snowtrace.io/tx/${purchaseTxHash}`} 
+                      target="_blank" 
+                      className="btn-bw" 
+                      style={{ width: '100%', textDecoration: 'none', display: 'flex', justifyContent: 'center', gap: '8px' }}
+                    >
+                      <TrendingUp size={18} /> {t.defi.sale.viewOnExplorer}
+                    </a>
+                    <button 
+                      onClick={() => { setIsDrawerOpen(false); setPurchaseStatus('idle'); }} 
+                      className="btn-primary" 
+                      style={{ width: '100%', height: '55px' }}
+                    >
+                      {t.defi.sale.backToSite}
+                    </button>
+                  </div>
                 </div>
+              ) : (
+                /* IDLE / PROCESSING VIEW */
+                <>
+                  <div className="glass-card" style={{ marginBottom: '20px', padding: '15px', textAlign: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{lang === 'RU' ? 'Ваш баланс:' : 'Your balance:'}</span>
+                      <button onClick={addTokenToWallet} className="btn-add-token" style={{ padding: '2px 8px', fontSize: '10px' }}>+ IMPORT GBU</button>
+                    </div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-main)' }}>
+                      {parseFloat(balance).toLocaleString()} GBU
+                    </div>
+                  </div>
 
-                <label htmlFor="drawer-buy-amt" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>{t.defi.sale.inputLabel}</label>
-                <input
-                  id="drawer-buy-amt"
-                  type="number"
-                  value={purchaseAmt}
-                  onChange={(e) => setPurchaseAmt(Number(e.target.value))}
-                  placeholder="100"
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '15px', color: 'white', borderRadius: '12px', fontSize: '1.1rem' }}
-                />
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px', textAlign: 'center' }}>
-                  {paymentCurrency === 'AVAX' 
-                    ? `${t.defi.sale.rateInfo} | ~${(purchaseAmt / newAvaxRate).toFixed(3)} AVAX`
-                    : `Rate: ${newUsdtRate} GBU per USDT | ~${(purchaseAmt / newUsdtRate).toFixed(2)} USDT`
-                  }
-                </div>
-              </div>
+                  <div style={{ marginBottom: '25px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                      <div 
+                        onClick={() => setPaymentCurrency('AVAX')}
+                        className={`glass-card ${paymentCurrency === 'AVAX' ? 'active' : ''}`}
+                        style={{ 
+                          padding: '15px', 
+                          cursor: 'pointer', 
+                          border: `2px solid ${paymentCurrency === 'AVAX' ? 'var(--accent-red)' : 'rgba(255,255,255,0.05)'}`,
+                          background: paymentCurrency === 'AVAX' ? 'rgba(232, 65, 66, 0.1)' : ''
+                        }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '5px' }}>PAY WITH</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#E84142' }} />
+                          AVAX
+                        </div>
+                      </div>
+                      <div 
+                        onClick={() => setPaymentCurrency('USDT')}
+                        className={`glass-card ${paymentCurrency === 'USDT' ? 'active' : ''}`}
+                        style={{ 
+                          padding: '15px', 
+                          cursor: 'pointer', 
+                          border: `2px solid ${paymentCurrency === 'USDT' ? '#26A17B' : 'rgba(255,255,255,0.05)'}`,
+                          background: paymentCurrency === 'USDT' ? 'rgba(38, 161, 123, 0.1)' : ''
+                        }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '5px' }}>PAY WITH</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#26A17B' }} />
+                          USDT
+                        </div>
+                      </div>
+                    </div>
 
-              {chainId !== 43114 && isConnected && (
-                <div style={{ marginBottom: '15px', padding: '10px', background: 'rgba(232, 65, 66, 0.1)', border: '1px solid var(--accent-red)', borderRadius: '8px', textAlign: 'center', color: '#ffaaaa', fontSize: '0.8rem' }}>
-                  {lang === 'RU' ? 'Пожалуйста, переключите сеть на Avalanche C-Chain для покупки.' : 'Please switch your network to Avalanche C-Chain to purchase.'}
-                </div>
+                    <label htmlFor="drawer-buy-amt" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>{t.defi.sale.inputLabel}</label>
+                    <input
+                      id="drawer-buy-amt"
+                      type="number"
+                      value={purchaseAmt}
+                      onChange={(e) => setPurchaseAmt(Number(e.target.value))}
+                      placeholder="100"
+                      style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '15px', color: 'white', borderRadius: '12px', fontSize: '1.1rem' }}
+                    />
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px', textAlign: 'center' }}>
+                      {paymentCurrency === 'AVAX' 
+                        ? `${t.defi.sale.rateInfo} | ~${(purchaseAmt / newAvaxRate).toFixed(3)} AVAX`
+                        : `Rate: ${newUsdtRate} GBU per USDT | ~${(purchaseAmt / newUsdtRate).toFixed(2)} USDT`
+                      }
+                    </div>
+                  </div>
+
+                  {chainId !== 43114 && isConnected && (
+                    <div style={{ marginBottom: '15px', padding: '10px', background: 'rgba(232, 65, 66, 0.1)', border: '1px solid var(--accent-red)', borderRadius: '8px', textAlign: 'center', color: '#ffaaaa', fontSize: '0.8rem' }}>
+                      {lang === 'RU' ? 'Пожалуйста, переключите сеть на Avalanche C-Chain для покупки.' : 'Please switch your network to Avalanche C-Chain to purchase.'}
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <button
+                      onClick={paymentCurrency === 'AVAX' ? handleBuyWithAvax : handleBuyWithUsdt}
+                      disabled={isBurning || (chainId !== 43114 && isConnected)}
+                      className="btn-primary"
+                      style={{ 
+                        width: '100%', 
+                        height: '55px', 
+                        justifyContent: 'center', 
+                        fontSize: '1rem',
+                        opacity: (chainId !== 43114 && isConnected) ? 0.5 : 1,
+                        background: paymentCurrency === 'USDT' ? '#26A17B' : ''
+                      }}
+                    >
+                      <Zap size={20} style={{ marginRight: '8px' }} /> 
+                      {isBurning 
+                        ? (purchaseStatus === 'processing' ? 'Processing...' : 'Wait...') 
+                        : (paymentCurrency === 'USDT' ? (lang === 'RU' ? 'Купить за USDT' : 'Buy with USDT') : t.defi.sale.buyAvax)
+                      }
+                    </button>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button
+                        onClick={() => setIsDrawerOpen(false)}
+                        className="btn-bw"
+                        style={{ flex: 1, height: '45px' }}
+                      >
+                        {lang === 'RU' ? 'Закрыть' : 'Close'}
+                      </button>
+                      <button
+                        onClick={() => open({ view: 'Account' })}
+                        className="btn-bw"
+                        style={{ flex: 1, height: '45px', border: '1px solid rgba(255,100,100,0.3)', color: '#ffaaaa' }}
+                      >
+                        {t.defi.sale.disconnect}
+                      </button>
+                    </div>
+                  </div>
+                </>
               )}
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <button
-                  onClick={paymentCurrency === 'AVAX' ? handleBuyWithAvax : handleBuyWithUsdt}
-                  disabled={isBurning || (chainId !== 43114 && isConnected)}
-                  className="btn-primary"
-                  style={{ 
-                    width: '100%', 
-                    height: '55px', 
-                    justifyContent: 'center', 
-                    fontSize: '1rem',
-                    opacity: (chainId !== 43114 && isConnected) ? 0.5 : 1,
-                    background: paymentCurrency === 'USDT' ? '#26A17B' : ''
-                  }}
-                >
-                  <Zap size={20} style={{ marginRight: '8px' }} /> 
-                  {isBurning 
-                    ? 'Processing...' 
-                    : (paymentCurrency === 'USDT' ? (lang === 'RU' ? 'Купить за USDT' : 'Buy with USDT') : t.defi.sale.buyAvax)
-                  }
-                </button>
-                <button
-                  onClick={() => setIsDrawerOpen(false)}
-                  className="btn-bw"
-                  style={{ width: '100%', height: '50px' }}
-                >
-                  {lang === 'RU' ? 'Закрыть' : 'Close'}
-                </button>
-              </div>
 
               {/* ADMIN PANEL INSIDE DRAWER */}
               {saleStats.isOwner && (

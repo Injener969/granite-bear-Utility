@@ -1,0 +1,99 @@
+
+/* --- NFT 3D FLIP CARDS --- */
+.flip-card {
+  background-color: transparent;
+  width: 100%;
+  height: 220px;
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+
+.flip-card:hover .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.flip-card-front {
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--glass-border);
+}
+
+.flip-card-front img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.flip-card-back {
+  background: linear-gradient(135deg, rgba(10,10,25,0.95) 0%, rgba(30,30,50,0.95) 100%);
+  color: white;
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid var(--glass-border);
+}
+
+.flip-card-back-silver { border-color: #C0C0C0; box-shadow: 0 0 20px rgba(192,192,192,0.2) inset; }
+.flip-card-back-gold { border-color: var(--accent-gold); box-shadow: 0 0 20px rgba(255,194,51,0.2) inset; }
+.flip-card-back-bronze { border-color: #CD7F32; box-shadow: 0 0 20px rgba(205,127,50,0.2) inset; }
+
+.flip-title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.flip-discount {
+  font-size: 1.5rem;
+  font-weight: 900;
+  margin-bottom: 15px;
+}
+
+.silver-text { color: #C0C0C0; text-shadow: 0 0 10px rgba(192,192,192,0.5); }
+.gold-text { color: var(--accent-gold); text-shadow: 0 0 10px rgba(255,194,51,0.5); }
+.bronze-text { color: #CD7F32; text-shadow: 0 0 10px rgba(205,127,50,0.5); }
+
+.flip-perks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: left;
+  width: 100%;
+}
+
+.flip-perks li {
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
