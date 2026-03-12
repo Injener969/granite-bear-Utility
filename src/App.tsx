@@ -75,8 +75,22 @@ const GBU_ABI = [
 
 const USDT_ABI = [
   "function approve(address spender, uint256 amount) public returns (bool)",
+  "function allowance(address owner, address spender) view returns (uint256)",
   "function balanceOf(address account) view returns (uint256)",
   "function decimals() view returns (uint8)"
+];
+
+const GBU_SALE_ABI = [
+  "function buyWithAvax() payable",
+  "function buyWithUsdt(uint256 usdtAmount)",
+  "function setRates(uint256 _avaxRate, uint256 _usdtRate) external",
+  "function withdrawAll() external",
+  "function withdrawGbu(uint256 amount) external",
+  "function avaxRate() view returns (uint256)",
+  "function usdtRate() view returns (uint256)",
+  "function gbuToken() view returns (address)",
+  "function usdtToken() view returns (address)",
+  "function owner() view returns (address)"
 ];
 
 const fadeUp = {
@@ -125,6 +139,8 @@ function App() {
 
   const [newAvaxRate, setNewAvaxRate] = useState<number>(905);
   const [newUsdtRate, setNewUsdtRate] = useState<number>(16);
+  const [replenishAmount, setReplenishAmount] = useState<number>(10000);
+  const [withdrawGbuAmount, setWithdrawGbuAmount] = useState<number>(10000);
 
   const [saleStats, setSaleStats] = useState({
     avaxBalance: "0",
@@ -195,25 +211,36 @@ function App() {
       const bal = await contract.balanceOf(address);
       setBalance(formatUnits(bal, 18));
 
+      // Read current rates from the sale contract
+      try {
+        const saleContract = new Contract(GBU_SALE_ADDRESS, GBU_SALE_ABI, provider);
+        const contractAvaxRate = await saleContract.avaxRate();
+        const contractUsdtRate = await saleContract.usdtRate();
+        setNewAvaxRate(Number(contractAvaxRate));
+        setNewUsdtRate(Number(contractUsdtRate));
+      } catch (e) {
+        console.warn("Could not read rates from contract, using defaults");
+      }
+
       // Check if owner and fetch stats
-      if (address.toLowerCase() === "0x6c18c4ba7e3b4574dd70e2c2a81b0a18321d039f") {
-        const usdtABI = ["function balanceOf(address) view returns (uint256)"];
+      try {
+        const saleContract = new Contract(GBU_SALE_ADDRESS, GBU_SALE_ABI, provider);
+        const contractOwner = await saleContract.owner();
+        if (address.toLowerCase() === contractOwner.toLowerCase()) {
+          const avaxBal = await provider.getBalance(GBU_SALE_ADDRESS);
+          const usdtContract = new Contract(USDT_ADDRESS, USDT_ABI, provider);
+          const usdtBal = await usdtContract.balanceOf(GBU_SALE_ADDRESS);
+          const gbuReserves = await contract.balanceOf(GBU_SALE_ADDRESS);
 
-        const avaxBal = await provider.getBalance(GBU_SALE_ADDRESS);
-        const usdtContract = new Contract(USDT_ADDRESS, usdtABI, provider);
-        const usdtBal = await usdtContract.balanceOf(GBU_SALE_ADDRESS);
-        const gbuReserves = await contract.balanceOf(GBU_SALE_ADDRESS);
-
-        setSaleStats({
-          avaxBalance: parseFloat(formatUnits(avaxBal, 18)).toFixed(4),
-          usdtBalance: formatUnits(usdtBal, 6),
-          gbuStored: parseFloat(formatUnits(gbuReserves, 18)).toLocaleString(),
-          isOwner: true
-        });
-
-        // Match rates if first fetch
-        setNewAvaxRate(905);
-        setNewUsdtRate(16);
+          setSaleStats({
+            avaxBalance: parseFloat(formatUnits(avaxBal, 18)).toFixed(4),
+            usdtBalance: parseFloat(formatUnits(usdtBal, 6)).toFixed(2),
+            gbuStored: parseFloat(formatUnits(gbuReserves, 18)).toLocaleString(),
+            isOwner: true
+          });
+        }
+      } catch (e) {
+        console.warn("Could not check owner status");
       }
     } catch (err) {
       console.error("Error fetching balance:", err);
@@ -225,7 +252,7 @@ function App() {
     try {
       const provider = new BrowserProvider(walletProvider);
       const signer = await provider.getSigner();
-      const saleContract = new Contract(GBU_SALE_ADDRESS, ["function setRates(uint256,uint256) external"], signer);
+      const saleContract = new Contract(GBU_SALE_ADDRESS, GBU_SALE_ABI, signer);
       const tx = await saleContract.setRates(newAvaxRate, newUsdtRate);
       await tx.wait();
       alert(lang === 'RU' ? "Курсы успешно обновлены!" : "Rates updated successfully!");
@@ -239,13 +266,47 @@ function App() {
     try {
       const provider = new BrowserProvider(walletProvider);
       const signer = await provider.getSigner();
-      const saleContract = new Contract(GBU_SALE_ADDRESS, ["function withdrawAll() external"], signer);
+      const saleContract = new Contract(GBU_SALE_ADDRESS, GBU_SALE_ABI, signer);
       const tx = await saleContract.withdrawAll();
       await tx.wait();
-      alert(lang === 'RU' ? "Средства выведены!" : "Funds withdrawn!");
+      alert(lang === 'RU' ? "AVAX + USDT выведены на ваш кошелёк!" : "AVAX + USDT withdrawn to your wallet!");
       updateBalance();
     } catch (err) {
       console.error("Withdraw failed:", err);
+    }
+  };
+
+  const handleWithdrawGbu = async () => {
+    if (!walletProvider) return;
+    try {
+      const provider = new BrowserProvider(walletProvider);
+      const signer = await provider.getSigner();
+      const saleContract = new Contract(GBU_SALE_ADDRESS, GBU_SALE_ABI, signer);
+      const amount = BigInt(Math.floor(withdrawGbuAmount)) * BigInt(1e18);
+      const tx = await saleContract.withdrawGbu(amount);
+      await tx.wait();
+      alert(lang === 'RU' ? `${withdrawGbuAmount} GBU выведены!` : `${withdrawGbuAmount} GBU withdrawn!`);
+      updateBalance();
+    } catch (err) {
+      console.error("Withdraw GBU failed:", err);
+    }
+  };
+
+  const handleReplenishGbu = async () => {
+    if (!walletProvider) return;
+    try {
+      const provider = new BrowserProvider(walletProvider);
+      const signer = await provider.getSigner();
+      const gbuContract = new Contract(GBU_ADDRESS, [
+        "function transfer(address to, uint256 amount) public returns (bool)"
+      ], signer);
+      const amount = BigInt(Math.floor(replenishAmount)) * BigInt(1e18);
+      const tx = await gbuContract.transfer(GBU_SALE_ADDRESS, amount);
+      await tx.wait();
+      alert(lang === 'RU' ? `${replenishAmount} GBU добавлены в контракт продажи!` : `${replenishAmount} GBU added to sale contract!`);
+      updateBalance();
+    } catch (err) {
+      console.error("Replenish GBU failed:", err);
     }
   };
 
@@ -262,16 +323,18 @@ function App() {
       const signer = await provider.getSigner();
       const saleContract = new Contract(GBU_SALE_ADDRESS, GBU_SALE_ABI, signer);
 
-      const amountGBU = BigInt(Math.floor(purchaseAmt * 1e18));
-      const costAvax = await saleContract.getAmountIn(amountGBU);
+      // Calculate AVAX needed: purchaseAmt GBU / avaxRate = AVAX to send
+      // Contract does: msg.value * avaxRate = GBU to give
+      const avaxNeeded = purchaseAmt / newAvaxRate;
+      const avaxWei = parseEther(avaxNeeded.toFixed(18));
 
-      const tx = await saleContract.buyWithAvax(amountGBU, { value: costAvax });
+      const tx = await saleContract.buyWithAvax({ value: avaxWei });
       setPurchaseTxHash(tx.hash);
       await tx.wait();
 
       setPurchaseDetails({ 
         gbu: purchaseAmt, 
-        cost: Number(formatUnits(costAvax, 18)), 
+        cost: avaxNeeded, 
         currency: 'AVAX' 
       });
       setPurchaseStatus('success');
@@ -301,23 +364,25 @@ function App() {
       const usdtContract = new Contract(USDT_ADDRESS, USDT_ABI, signer);
       const saleContract = new Contract(GBU_SALE_ADDRESS, GBU_SALE_ABI, signer);
 
-      const amountGBU = BigInt(Math.floor(purchaseAmt * 1e18));
-      const costUsdt = await saleContract.getAmountInUsdt(amountGBU);
+      // Calculate USDT needed: purchaseAmt GBU / usdtRate = USDT to send
+      // Contract does: usdtAmount * usdtRate * 1e12 = GBU (adjusting 6->18 decimals)
+      const usdtNeeded = purchaseAmt / newUsdtRate;
+      const usdtAmount = parseUnits(usdtNeeded.toFixed(6), 6); // USDT has 6 decimals
 
       // Check allowance
       const allowance = await usdtContract.allowance(address, GBU_SALE_ADDRESS);
-      if (allowance < costUsdt) {
-        const approveTx = await usdtContract.approve(GBU_SALE_ADDRESS, costUsdt);
+      if (allowance < usdtAmount) {
+        const approveTx = await usdtContract.approve(GBU_SALE_ADDRESS, usdtAmount);
         await approveTx.wait();
       }
 
-      const tx = await saleContract.buyWithUsdt(amountGBU);
+      const tx = await saleContract.buyWithUsdt(usdtAmount);
       setPurchaseTxHash(tx.hash);
       await tx.wait();
 
       setPurchaseDetails({ 
         gbu: purchaseAmt, 
-        cost: Number(formatUnits(costUsdt, 6)), 
+        cost: usdtNeeded, 
         currency: 'USDT' 
       });
       setPurchaseStatus('success');
@@ -1302,20 +1367,27 @@ function App() {
               {saleStats.isOwner && (
                 <div className="glass-card" style={{ marginTop: '30px', border: '1px solid var(--accent-gold)', borderStyle: 'dashed' }}>
                   <h3 style={{ fontSize: '0.9rem', color: 'var(--accent-gold)', marginBottom: '15px', textAlign: 'center' }}>
-                    {t.defi.sale.admin.title}
+                    ⚙️ {t.defi.sale.admin.title}
                   </h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
-                    <div style={{ textAlign: 'center', background: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '8px' }}>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t.defi.sale.admin.profitAvax}</div>
-                      <div style={{ fontWeight: 'bold' }}>{saleStats.avaxBalance}</div>
+
+                  {/* Balances: 3 columns */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '15px' }}>
+                    <div style={{ textAlign: 'center', background: 'rgba(232,65,66,0.08)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(232,65,66,0.2)' }}>
+                      <div style={{ fontSize: '0.6rem', color: '#E84142', fontWeight: 'bold' }}>AVAX</div>
+                      <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{saleStats.avaxBalance}</div>
                     </div>
-                    <div style={{ textAlign: 'center', background: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '8px' }}>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t.defi.sale.admin.reservesGbu}</div>
-                      <div style={{ fontWeight: 'bold' }}>{saleStats.gbuStored}</div>
+                    <div style={{ textAlign: 'center', background: 'rgba(38,161,123,0.08)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(38,161,123,0.2)' }}>
+                      <div style={{ fontSize: '0.6rem', color: '#26A17B', fontWeight: 'bold' }}>USDT</div>
+                      <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{saleStats.usdtBalance}</div>
+                    </div>
+                    <div style={{ textAlign: 'center', background: 'rgba(212,175,55,0.08)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(212,175,55,0.2)' }}>
+                      <div style={{ fontSize: '0.6rem', color: 'var(--accent-gold)', fontWeight: 'bold' }}>{lang === 'RU' ? 'ЗАПАС GBU' : 'GBU STOCK'}</div>
+                      <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{saleStats.gbuStored}</div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {/* Rate Inputs */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                       <div>
                         <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{t.defi.sale.admin.rateAvaxLabel}</label>
@@ -1338,12 +1410,51 @@ function App() {
                     </div>
 
                     <button onClick={handleUpdateRates} className="btn-gold" style={{ width: '100%', padding: '12px', fontSize: '0.8rem' }}>
-                      {t.defi.sale.admin.btnUpdate}
+                      📊 {t.defi.sale.admin.btnUpdate}
                     </button>
 
+                    {/* Separator */}
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', margin: '5px 0' }} />
+
+                    {/* Withdraw AVAX + USDT */}
                     <button onClick={handleWithdrawFunds} className="btn-primary" style={{ width: '100%', padding: '12px', fontSize: '0.8rem', background: '#27ae60' }}>
-                      {t.defi.sale.admin.btnWithdraw}
+                      💰 {t.defi.sale.admin.btnWithdraw}
                     </button>
+
+                    {/* Separator */}
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', margin: '5px 0' }} />
+
+                    {/* Withdraw GBU */}
+                    <div>
+                      <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{lang === 'RU' ? 'Количество GBU для вывода' : 'GBU amount to withdraw'}</label>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                        <input
+                          type="number"
+                          value={withdrawGbuAmount}
+                          onChange={(e) => setWithdrawGbuAmount(Number(e.target.value))}
+                          style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px' }}
+                        />
+                        <button onClick={handleWithdrawGbu} className="btn-bw" style={{ padding: '8px 16px', fontSize: '0.75rem', border: '1px solid rgba(232,65,66,0.3)', color: '#ffaaaa' }}>
+                          {lang === 'RU' ? '⬆ Вывести' : '⬆ Withdraw'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Replenish GBU */}
+                    <div>
+                      <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{lang === 'RU' ? 'Пополнить контракт (GBU)' : 'Replenish contract (GBU)'}</label>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                        <input
+                          type="number"
+                          value={replenishAmount}
+                          onChange={(e) => setReplenishAmount(Number(e.target.value))}
+                          style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px' }}
+                        />
+                        <button onClick={handleReplenishGbu} className="btn-bw" style={{ padding: '8px 16px', fontSize: '0.75rem', border: '1px solid rgba(38,161,123,0.3)', color: '#81c784' }}>
+                          {lang === 'RU' ? '⬇ Пополнить' : '⬇ Replenish'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
