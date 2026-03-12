@@ -109,6 +109,7 @@ const tokenomicsData = [
 function App() {
   const [lang, setLang] = useState<'RU' | 'EN'>('RU');
   const [purchaseAmt, setPurchaseAmt] = useState(500);
+  const [paymentAmt, setPaymentAmt] = useState(0.553);
   const [scrolled, setScrolled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [expandedCoin, setExpandedCoin] = useState<string | null>(null);
@@ -241,6 +242,12 @@ function App() {
           const usdtBal = await usdtContract.balanceOf(GBU_SALE_ADDRESS);
           const gbuReserves = await contract.balanceOf(GBU_SALE_ADDRESS);
 
+          console.log("Admin stats:", {
+            avax: formatUnits(avaxBal, 18),
+            usdt: formatUnits(usdtBal, 6),
+            gbu: formatUnits(gbuReserves, 18)
+          });
+
           setSaleStats({
             avaxBalance: parseFloat(formatUnits(avaxBal, 18)).toFixed(4),
             usdtBalance: parseFloat(formatUnits(usdtBal, 6)).toFixed(2),
@@ -248,7 +255,7 @@ function App() {
             isOwner: true
           });
         } catch (e) {
-          console.warn("Could not fetch sale stats");
+          console.error("Admin panel balance fetch error:", e);
           setSaleStats(prev => ({ ...prev, isOwner: true }));
         }
       }
@@ -1277,94 +1284,90 @@ function App() {
                   </div>
 
                   <div style={{ marginBottom: '25px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                    {/* Currency Toggle */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
                       <div 
-                        onClick={() => setPaymentCurrency('AVAX')}
-                        className={`glass-card ${paymentCurrency === 'AVAX' ? 'active' : ''}`}
+                        onClick={() => { setPaymentCurrency('AVAX'); setPaymentAmt(+(purchaseAmt / newAvaxRate).toFixed(4)); }}
                         style={{ 
-                          padding: '15px', 
-                          cursor: 'pointer', 
-                          border: `2px solid ${paymentCurrency === 'AVAX' ? 'var(--accent-red)' : 'rgba(255,255,255,0.05)'}`,
-                          background: paymentCurrency === 'AVAX' ? 'rgba(232, 65, 66, 0.1)' : ''
+                          padding: '12px', cursor: 'pointer', borderRadius: '12px', textAlign: 'center',
+                          border: `2px solid ${paymentCurrency === 'AVAX' ? '#E84142' : 'rgba(255,255,255,0.05)'}`,
+                          background: paymentCurrency === 'AVAX' ? 'rgba(232, 65, 66, 0.15)' : 'rgba(255,255,255,0.02)'
                         }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '5px' }}>PAY WITH</div>
-                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#E84142' }} />
+                        <div style={{ fontSize: '1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                          <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#E84142' }} />
                           AVAX
                         </div>
                       </div>
                       <div 
-                        onClick={() => setPaymentCurrency('USDT')}
-                        className={`glass-card ${paymentCurrency === 'USDT' ? 'active' : ''}`}
+                        onClick={() => { setPaymentCurrency('USDT'); setPaymentAmt(+(purchaseAmt / newUsdtRate).toFixed(2)); }}
                         style={{ 
-                          padding: '15px', 
-                          cursor: 'pointer', 
+                          padding: '12px', cursor: 'pointer', borderRadius: '12px', textAlign: 'center',
                           border: `2px solid ${paymentCurrency === 'USDT' ? '#26A17B' : 'rgba(255,255,255,0.05)'}`,
-                          background: paymentCurrency === 'USDT' ? 'rgba(38, 161, 123, 0.1)' : ''
+                          background: paymentCurrency === 'USDT' ? 'rgba(38, 161, 123, 0.15)' : 'rgba(255,255,255,0.02)'
                         }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '5px' }}>PAY WITH</div>
-                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#26A17B' }} />
+                        <div style={{ fontSize: '1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                          <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#26A17B' }} />
                           USDT
                         </div>
                       </div>
                     </div>
 
-                    <label htmlFor="drawer-buy-amt" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                      {lang === 'RU' ? 'Сколько GBU хотите купить:' : 'How many GBU to buy:'}
-                    </label>
-                    <input
-                      id="drawer-buy-amt"
-                      type="number"
-                      value={purchaseAmt}
-                      onChange={(e) => setPurchaseAmt(Number(e.target.value))}
-                      placeholder="100"
-                      style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '15px', color: 'white', borderRadius: '12px', fontSize: '1.1rem' }}
-                    />
+                    {/* SWAP INTERFACE */}
+                    {/* TOP: Payment Input */}
+                    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '16px', marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          {lang === 'RU' ? 'Вы отдаёте:' : 'You pay:'}
+                        </span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: paymentCurrency === 'AVAX' ? '#E84142' : '#26A17B' }}>
+                          {paymentCurrency}
+                        </span>
+                      </div>
+                      <input
+                        type="number"
+                        value={paymentAmt}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          setPaymentAmt(val);
+                          const rate = paymentCurrency === 'AVAX' ? newAvaxRate : newUsdtRate;
+                          setPurchaseAmt(Math.floor(val * rate));
+                        }}
+                        placeholder="0.0"
+                        style={{ width: '100%', background: 'transparent', border: 'none', padding: '8px 0', color: 'white', fontSize: '1.5rem', fontWeight: 'bold', outline: 'none' }}
+                      />
+                    </div>
 
-                    {/* Conversion Preview Card */}
-                    <div style={{ marginTop: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '15px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    {/* Arrow */}
+                    <div style={{ textAlign: 'center', margin: '-4px 0', position: 'relative', zIndex: 2 }}>
+                      <span style={{ display: 'inline-block', background: '#1a1a2e', border: '2px solid rgba(255,255,255,0.1)', borderRadius: '50%', width: '36px', height: '36px', lineHeight: '32px', fontSize: '1.2rem' }}>↓</span>
+                    </div>
+
+                    {/* BOTTOM: GBU Output */}
+                    <div style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.15)', borderRadius: '16px', padding: '16px', marginTop: '-4px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          {lang === 'RU' ? 'Вы получите:' : 'You will receive:'}
+                          {lang === 'RU' ? 'Вы получите:' : 'You receive:'}
                         </span>
-                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--accent-gold)' }}>
-                          {purchaseAmt.toLocaleString()} GBU
-                        </span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent-gold)' }}>GBU</span>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          {lang === 'RU' ? 'Стоимость:' : 'Cost:'}
-                        </span>
-                        <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: paymentCurrency === 'AVAX' ? '#E84142' : '#26A17B' }}>
-                          {paymentCurrency === 'AVAX'
-                            ? `~${(purchaseAmt / newAvaxRate).toFixed(4)} AVAX`
-                            : `~${(purchaseAmt / newUsdtRate).toFixed(2)} USDT`
-                          }
-                        </span>
-                      </div>
-                      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                          {lang === 'RU' ? 'Курс:' : 'Rate:'}
-                        </span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          {paymentCurrency === 'AVAX'
-                            ? `1 AVAX = ${newAvaxRate} GBU`
-                            : `1 USDT = ${newUsdtRate} GBU`
-                          }
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
-                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                          {lang === 'RU' ? 'Цена 1 GBU:' : 'Price per GBU:'}
-                        </span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                          {paymentCurrency === 'AVAX'
-                            ? `~${(1 / newAvaxRate).toFixed(6)} AVAX`
-                            : `~${(1 / newUsdtRate).toFixed(4)} USDT`
-                          }
-                        </span>
-                      </div>
+                      <input
+                        type="number"
+                        value={purchaseAmt}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          setPurchaseAmt(val);
+                          const rate = paymentCurrency === 'AVAX' ? newAvaxRate : newUsdtRate;
+                          setPaymentAmt(+(val / rate).toFixed(paymentCurrency === 'AVAX' ? 4 : 2));
+                        }}
+                        placeholder="0"
+                        style={{ width: '100%', background: 'transparent', border: 'none', padding: '8px 0', color: 'var(--accent-gold)', fontSize: '1.5rem', fontWeight: 'bold', outline: 'none' }}
+                      />
+                    </div>
+
+                    {/* Rate info */}
+                    <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)', padding: '0 4px' }}>
+                      <span>{lang === 'RU' ? 'Курс:' : 'Rate:'} 1 {paymentCurrency} = {paymentCurrency === 'AVAX' ? newAvaxRate : newUsdtRate} GBU</span>
+                      <span>{lang === 'RU' ? 'Цена:' : 'Price:'} 1 GBU = {paymentCurrency === 'AVAX' ? (1/newAvaxRate).toFixed(6) : (1/newUsdtRate).toFixed(4)} {paymentCurrency}</span>
                     </div>
                   </div>
 
