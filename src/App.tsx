@@ -109,7 +109,7 @@ const tokenomicsData = [
 function App() {
   const [lang, setLang] = useState<'RU' | 'EN'>('RU');
   const [purchaseAmt, setPurchaseAmt] = useState(500);
-  const [paymentAmt, setPaymentAmt] = useState(0.553);
+  const [paymentAmt, setPaymentAmt] = useState(0.5525);
   const [scrolled, setScrolled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [expandedCoin, setExpandedCoin] = useState<string | null>(null);
@@ -134,11 +134,11 @@ function App() {
   const [defiStats, setDefiStats] = useState({
     volume24h: 42850,
     liquidityUSD: 1240000,
-    priceUSD: 0.0524,
+    priceUSD: 0.06,
     priceChange: 12.4
   });
 
-  const [newAvaxRate, setNewAvaxRate] = useState<number>(905);
+  const [newAvaxRate, setNewAvaxRate] = useState<number>(333);
   const [newUsdtRate, setNewUsdtRate] = useState<number>(16);
   const [replenishAmount, setReplenishAmount] = useState<number>(10000);
   const [withdrawGbuAmount, setWithdrawGbuAmount] = useState<number>(10000);
@@ -237,25 +237,40 @@ function App() {
 
       if (isOwner) {
         try {
-          const avaxBal = await provider.getBalance(GBU_SALE_ADDRESS);
-          const usdtContract = new Contract(USDT_ADDRESS, USDT_ABI, provider);
-          const usdtBal = await usdtContract.balanceOf(GBU_SALE_ADDRESS);
-          const gbuReserves = await contract.balanceOf(GBU_SALE_ADDRESS);
+          // Fetch balances independently so one failure doesn't stop others
+          let avaxBalStr = "0.0000";
+          try {
+            const avaxBal = await provider.getBalance(GBU_SALE_ADDRESS);
+            avaxBalStr = parseFloat(formatUnits(avaxBal, 18)).toFixed(4);
+          } catch (e) { console.error("Admin AVAX fetch error:", e); }
 
-          console.log("Admin stats:", {
-            avax: formatUnits(avaxBal, 18),
-            usdt: formatUnits(usdtBal, 6),
-            gbu: formatUnits(gbuReserves, 18)
-          });
+          let gbuStoredStr = "0";
+          try {
+            const gbuReserves = await contract.balanceOf(GBU_SALE_ADDRESS);
+            gbuStoredStr = parseFloat(formatUnits(gbuReserves, 18)).toLocaleString();
+          } catch (e) { console.error("Admin GBU fetch error:", e); }
+
+          // USDT balance may fail on some USDT proxies — handle separately
+          let usdtBalStr = "N/A";
+          try {
+            const usdtContract = new Contract(USDT_ADDRESS, USDT_ABI, provider);
+            const usdtBal = await usdtContract.balanceOf(GBU_SALE_ADDRESS);
+            usdtBalStr = parseFloat(formatUnits(usdtBal, 6)).toFixed(2);
+          } catch (usdtErr) {
+            console.warn("USDT balance read failed (proxy issue?)", usdtErr);
+            usdtBalStr = "err";
+          }
+
+          console.log("Admin stats synced:", { avax: avaxBalStr, usdt: usdtBalStr, gbu: gbuStoredStr });
 
           setSaleStats({
-            avaxBalance: parseFloat(formatUnits(avaxBal, 18)).toFixed(4),
-            usdtBalance: parseFloat(formatUnits(usdtBal, 6)).toFixed(2),
-            gbuStored: parseFloat(formatUnits(gbuReserves, 18)).toLocaleString(),
+            avaxBalance: avaxBalStr,
+            usdtBalance: usdtBalStr,
+            gbuStored: gbuStoredStr,
             isOwner: true
           });
         } catch (e) {
-          console.error("Admin panel balance fetch error:", e);
+          console.error("Admin panel global stats error:", e);
           setSaleStats(prev => ({ ...prev, isOwner: true }));
         }
       }
@@ -1325,12 +1340,14 @@ function App() {
                       </div>
                       <input
                         type="number"
-                        value={paymentAmt}
+                        value={paymentAmt || ''}
                         onChange={(e) => {
-                          const val = Number(e.target.value);
-                          setPaymentAmt(val);
+                          const valStr = e.target.value;
+                          setPaymentAmt(valStr === '' ? 0 : Number(valStr));
+                          const val = Number(valStr);
                           const rate = paymentCurrency === 'AVAX' ? newAvaxRate : newUsdtRate;
-                          setPurchaseAmt(Math.floor(val * rate));
+                          if (val > 0) setPurchaseAmt(Math.floor(val * rate));
+                          else setPurchaseAmt(0);
                         }}
                         placeholder="0.0"
                         style={{ width: '100%', background: 'transparent', border: 'none', padding: '8px 0', color: 'white', fontSize: '1.5rem', fontWeight: 'bold', outline: 'none' }}
@@ -1352,12 +1369,14 @@ function App() {
                       </div>
                       <input
                         type="number"
-                        value={purchaseAmt}
+                        value={purchaseAmt || ''}
                         onChange={(e) => {
-                          const val = Number(e.target.value);
-                          setPurchaseAmt(val);
+                          const valStr = e.target.value;
+                          setPurchaseAmt(valStr === '' ? 0 : Number(valStr));
+                          const val = Number(valStr);
                           const rate = paymentCurrency === 'AVAX' ? newAvaxRate : newUsdtRate;
-                          setPaymentAmt(+(val / rate).toFixed(paymentCurrency === 'AVAX' ? 4 : 2));
+                          if (val > 0 && rate > 0) setPaymentAmt(+(val / rate).toFixed(paymentCurrency === 'AVAX' ? 4 : 2));
+                          else setPaymentAmt(0);
                         }}
                         placeholder="0"
                         style={{ width: '100%', background: 'transparent', border: 'none', padding: '8px 0', color: 'var(--accent-gold)', fontSize: '1.5rem', fontWeight: 'bold', outline: 'none' }}
@@ -1367,7 +1386,7 @@ function App() {
                     {/* Rate info */}
                     <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)', padding: '0 4px' }}>
                       <span>{lang === 'RU' ? 'Курс:' : 'Rate:'} 1 {paymentCurrency} = {paymentCurrency === 'AVAX' ? newAvaxRate : newUsdtRate} GBU</span>
-                      <span>{lang === 'RU' ? 'Цена:' : 'Price:'} 1 GBU = {paymentCurrency === 'AVAX' ? (1/newAvaxRate).toFixed(6) : (1/newUsdtRate).toFixed(4)} {paymentCurrency}</span>
+                      <span>{lang === 'RU' ? 'Цена:' : 'Price:'} 1 GBU ≈ ${(1/(paymentCurrency === 'AVAX' ? (newAvaxRate/20) : newUsdtRate)).toFixed(3)}</span>
                     </div>
                   </div>
 
