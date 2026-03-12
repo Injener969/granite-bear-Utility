@@ -50,9 +50,8 @@ createWeb3Modal({
   ethersConfig,
   chains: [mainnet, fuji],
   projectId,
+  allWallets: 'SHOW',
   enableAnalytics: false,
-  allWallets: 'SHOW', // Show all available wallets
-
   themeVariables: {
     '--w3m-accent': '#E84142',
     '--w3m-border-radius-master': '10px',
@@ -65,7 +64,6 @@ const GBU_ADDRESS: string = "0x1CE7d0BBB25008f2b6b7A1Cdc0c5A9BB7eDAb96D";
 const GBU_SALE_ADDRESS: string = "0x5fE773c857cbFA9D0eAcF404B90C487F7fdcD5ec";
 const USDT_ADDRESS: string = "0x9702230a2441d44697590d48a91ed59151cf59c5";
 
-// TELEGRAM NOTIFICATION CONFIG REMOVED
 const GBU_ABI = [
   "function balanceOf(address owner) view returns (uint256)",
   "function decimals() view returns (uint8)",
@@ -278,6 +276,14 @@ function App() {
       console.error("Error fetching balance:", err);
     }
   };
+
+  useEffect(() => {
+    if (isConnected) {
+      updateBalance();
+      const interval = setInterval(updateBalance, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isConnected, address]);
 
   const handleUpdateRates = async () => {
     if (!walletProvider) return;
