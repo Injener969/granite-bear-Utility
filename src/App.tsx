@@ -211,15 +211,7 @@ function App() {
       setBalance(formatUnits(bal, 18));
 
       // Read current rates from the sale contract
-      try {
-        const saleContract = new Contract(GBU_SALE_ADDRESS, GBU_SALE_ABI, provider);
-        const contractAvaxRate = await saleContract.avaxRate();
-        const contractUsdtRate = await saleContract.usdtRate();
-        setNewAvaxRate(Number(contractAvaxRate));
-        setNewUsdtRate(Number(contractUsdtRate));
-      } catch (e) {
-        console.warn("Could not read rates from contract, using defaults");
-      }
+      
 
       // Check if owner and fetch stats
       let isOwner = false;
@@ -1390,6 +1382,13 @@ function App() {
                     </div>
 
                     {/* Rate info */}
+                    
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px', textAlign: 'center' }}>
+                      {paymentCurrency === 'AVAX' 
+                        ? `${t.defi.sale.rateInfo} | ~${(purchaseAmt / newAvaxRate).toFixed(3)} AVAX`
+                        : `Rate: ${newUsdtRate} GBU per USDT | ~${(purchaseAmt / newUsdtRate).toFixed(2)} USDT`
+                      }
+                    </div>
                     <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)', padding: '0 4px' }}>
                       <span>{lang === 'RU' ? 'Курс:' : 'Rate:'} 1 {paymentCurrency} = {paymentCurrency === 'AVAX' ? newAvaxRate : newUsdtRate} GBU</span>
                       <span>{lang === 'RU' ? 'Цена:' : 'Price:'} 1 GBU ≈ ${(1/(paymentCurrency === 'AVAX' ? (newAvaxRate/20) : newUsdtRate)).toFixed(3)}</span>
@@ -1492,48 +1491,10 @@ function App() {
                       📊 {t.defi.sale.admin.btnUpdate}
                     </button>
 
-                    {/* Separator */}
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', margin: '5px 0' }} />
-
                     {/* Withdraw AVAX + USDT */}
                     <button onClick={handleWithdrawFunds} className="btn-primary" style={{ width: '100%', padding: '12px', fontSize: '0.8rem', background: '#27ae60' }}>
                       💰 {t.defi.sale.admin.btnWithdraw}
                     </button>
-
-                    {/* Separator */}
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', margin: '5px 0' }} />
-
-                    {/* Withdraw GBU */}
-                    <div>
-                      <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{lang === 'RU' ? 'Количество GBU для вывода' : 'GBU amount to withdraw'}</label>
-                      <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
-                        <input
-                          type="number"
-                          value={withdrawGbuAmount}
-                          onChange={(e) => setWithdrawGbuAmount(Number(e.target.value))}
-                          style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px' }}
-                        />
-                        <button onClick={handleWithdrawGbu} className="btn-bw" style={{ padding: '8px 16px', fontSize: '0.75rem', border: '1px solid rgba(232,65,66,0.3)', color: '#ffaaaa' }}>
-                          {lang === 'RU' ? '⬆ Вывести' : '⬆ Withdraw'}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Replenish GBU */}
-                    <div>
-                      <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{lang === 'RU' ? 'Пополнить контракт (GBU)' : 'Replenish contract (GBU)'}</label>
-                      <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
-                        <input
-                          type="number"
-                          value={replenishAmount}
-                          onChange={(e) => setReplenishAmount(Number(e.target.value))}
-                          style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px' }}
-                        />
-                        <button onClick={handleReplenishGbu} className="btn-bw" style={{ padding: '8px 16px', fontSize: '0.75rem', border: '1px solid rgba(38,161,123,0.3)', color: '#81c784' }}>
-                          {lang === 'RU' ? '⬇ Пополнить' : '⬇ Replenish'}
-                        </button>
-                      </div>
-                    </div>
                   </div>
                 </div>
               )}
