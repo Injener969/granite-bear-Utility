@@ -1441,7 +1441,7 @@ function App() {
                 </>
               )}
 
-              {/* ADMIN PANEL INSIDE DRAWER */}
+                            {/* ADMIN PANEL INSIDE DRAWER */}
               {saleStats.isOwner && (
                 <div className="glass-card" style={{ marginTop: '30px', border: '1px solid var(--accent-gold)', borderStyle: 'dashed' }}>
                   <h3 style={{ fontSize: '0.9rem', color: 'var(--accent-gold)', marginBottom: '15px', textAlign: 'center' }}>
@@ -1495,13 +1495,44 @@ function App() {
                     <button onClick={handleWithdrawFunds} className="btn-primary" style={{ width: '100%', padding: '12px', fontSize: '0.8rem', background: '#27ae60' }}>
                       💰 {t.defi.sale.admin.btnWithdraw}
                     </button>
+
+                    {/* Withdraw GBU */}
+                    <div>
+                      <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{lang === 'RU' ? 'Количество GBU для вывода' : 'GBU amount to withdraw'}</label>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                        <input
+                          type="number"
+                          value={withdrawGbuAmount}
+                          onChange={(e) => setWithdrawGbuAmount(Number(e.target.value))}
+                          style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px' }}
+                        />
+                        <button onClick={handleWithdrawGbu} className="btn-bw" style={{ padding: '8px 16px', fontSize: '0.75rem', border: '1px solid rgba(232,65,66,0.3)', color: '#ffaaaa' }}>
+                          {lang === 'RU' ? '⬆ Вывести' : '⬆ Withdraw'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Replenish GBU */}
+                    <div>
+                      <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{lang === 'RU' ? 'Пополнить контракт (GBU)' : 'Replenish contract (GBU)'}</label>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                        <input
+                          type="number"
+                          value={replenishAmount}
+                          onChange={(e) => setReplenishAmount(Number(e.target.value))}
+                          style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px' }}
+                        />
+                        <button onClick={handleReplenishGbu} className="btn-bw" style={{ padding: '8px 16px', fontSize: '0.75rem', border: '1px solid rgba(38,161,123,0.3)', color: '#81c784' }}>
+                          {lang === 'RU' ? '⬇ Пополнить' : '⬇ Replenish'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
             </motion.div>
           </>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>
 
       <AnimatePresence>
         {isMenuOpen && (
