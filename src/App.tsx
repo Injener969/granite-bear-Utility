@@ -1531,23 +1531,6 @@ function App() {
                 </div>
               )}
             </motion.div>
-          </>
-        </AnimatePresence>
-
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            className="mobile-menu-overlay"
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-          >
-            <div className="container" style={{ position: 'relative', height: '100%' }}>
-              <button className="close-btn" style={{ position: 'absolute', top: '0', right: '0' }} onClick={() => setIsMenuOpen(false)}>
-                <X size={32} />
-              </button>
-
-              <div className="mobile-menu-links">
                 <a href="#about" onClick={() => setIsMenuOpen(false)}>{t.nav.about}</a>
                 <a href="#yield" onClick={() => setIsMenuOpen(false)}>{lang === 'RU' ? 'Доходность' : 'Yield'}</a>
                 <a href="#defi" onClick={() => setIsMenuOpen(false)}>DEFI</a>
