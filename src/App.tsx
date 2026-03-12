@@ -223,10 +223,19 @@ function App() {
       }
 
       // Check if owner and fetch stats
+      let isOwner = false;
       try {
         const saleContract = new Contract(GBU_SALE_ADDRESS, GBU_SALE_ABI, provider);
         const contractOwner = await saleContract.owner();
-        if (address.toLowerCase() === contractOwner.toLowerCase()) {
+        isOwner = address.toLowerCase() === contractOwner.toLowerCase();
+      } catch (e) {
+        // Fallback: check known deployer address
+        isOwner = address.toLowerCase() === "0x6c18c4ba7e3b4574dd70e2c2a81b0a18321d039f";
+        console.warn("owner() call failed, using fallback address check");
+      }
+
+      if (isOwner) {
+        try {
           const avaxBal = await provider.getBalance(GBU_SALE_ADDRESS);
           const usdtContract = new Contract(USDT_ADDRESS, USDT_ABI, provider);
           const usdtBal = await usdtContract.balanceOf(GBU_SALE_ADDRESS);
@@ -238,9 +247,10 @@ function App() {
             gbuStored: parseFloat(formatUnits(gbuReserves, 18)).toLocaleString(),
             isOwner: true
           });
+        } catch (e) {
+          console.warn("Could not fetch sale stats");
+          setSaleStats(prev => ({ ...prev, isOwner: true }));
         }
-      } catch (e) {
-        console.warn("Could not check owner status");
       }
     } catch (err) {
       console.error("Error fetching balance:", err);
@@ -1300,7 +1310,9 @@ function App() {
                       </div>
                     </div>
 
-                    <label htmlFor="drawer-buy-amt" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>{t.defi.sale.inputLabel}</label>
+                    <label htmlFor="drawer-buy-amt" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                      {lang === 'RU' ? 'Сколько GBU хотите купить:' : 'How many GBU to buy:'}
+                    </label>
                     <input
                       id="drawer-buy-amt"
                       type="number"
@@ -1309,11 +1321,50 @@ function App() {
                       placeholder="100"
                       style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '15px', color: 'white', borderRadius: '12px', fontSize: '1.1rem' }}
                     />
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px', textAlign: 'center' }}>
-                      {paymentCurrency === 'AVAX' 
-                        ? `${t.defi.sale.rateInfo} | ~${(purchaseAmt / newAvaxRate).toFixed(3)} AVAX`
-                        : `Rate: ${newUsdtRate} GBU per USDT | ~${(purchaseAmt / newUsdtRate).toFixed(2)} USDT`
-                      }
+
+                    {/* Conversion Preview Card */}
+                    <div style={{ marginTop: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '15px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          {lang === 'RU' ? 'Вы получите:' : 'You will receive:'}
+                        </span>
+                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--accent-gold)' }}>
+                          {purchaseAmt.toLocaleString()} GBU
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          {lang === 'RU' ? 'Стоимость:' : 'Cost:'}
+                        </span>
+                        <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: paymentCurrency === 'AVAX' ? '#E84142' : '#26A17B' }}>
+                          {paymentCurrency === 'AVAX'
+                            ? `~${(purchaseAmt / newAvaxRate).toFixed(4)} AVAX`
+                            : `~${(purchaseAmt / newUsdtRate).toFixed(2)} USDT`
+                          }
+                        </span>
+                      </div>
+                      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                          {lang === 'RU' ? 'Курс:' : 'Rate:'}
+                        </span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          {paymentCurrency === 'AVAX'
+                            ? `1 AVAX = ${newAvaxRate} GBU`
+                            : `1 USDT = ${newUsdtRate} GBU`
+                          }
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                          {lang === 'RU' ? 'Цена 1 GBU:' : 'Price per GBU:'}
+                        </span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          {paymentCurrency === 'AVAX'
+                            ? `~${(1 / newAvaxRate).toFixed(6)} AVAX`
+                            : `~${(1 / newUsdtRate).toFixed(4)} USDT`
+                          }
+                        </span>
+                      </div>
                     </div>
                   </div>
 
