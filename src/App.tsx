@@ -786,8 +786,8 @@ function App() {
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '10px 0 20px' }}>{t.defi.buyDesc}</p>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <a href={`https://traderjoexyz.com/avalanche/trade?inputCurrency=AVAX&outputCurrency=${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ width: '100%', justifyContent: 'center', borderRadius: '50px', overflow: 'hidden' }}>
-                    <TrendingUp size={18} style={{ marginRight: '8px' }} /> TraderJoe (DEX)
+                  <a href={`https://lfj.gg/avalanche/pool/v1/0x1ce7d0bbb25008f2b6b7a1cdc0c5a9bb7edab96d/AVAX`} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ width: '100%', justifyContent: 'center', borderRadius: '50px', overflow: 'hidden' }}>
+                    <TrendingUp size={18} style={{ marginRight: '8px' }} /> LFJ (DEX)
                   </a>
                   <a href={`https://dexscreener.com/avalanche/${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-social" style={{ width: '100%', justifyContent: 'center', borderRadius: '50px', overflow: 'hidden' }}>
                     <BarChart3 size={18} style={{ marginRight: '8px' }} /> {t.defi.buyAnalytics}
@@ -1438,6 +1438,7 @@ function App() {
                       </button>
                     </div>
                   </div>
+
                 </>
               )}
 
@@ -1531,6 +1532,24 @@ function App() {
                 </div>
               )}
             </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            className="mobile-menu-overlay"
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
+          >
+            <div className="container" style={{ position: 'relative', height: '100%' }}>
+              <button className="close-btn" style={{ position: 'absolute', top: '0', right: '0' }} onClick={() => setIsMenuOpen(false)}>
+                <X size={32} />
+              </button>
+
+              <div className="mobile-menu-links">
                 <a href="#about" onClick={() => setIsMenuOpen(false)}>{t.nav.about}</a>
                 <a href="#yield" onClick={() => setIsMenuOpen(false)}>{lang === 'RU' ? 'Доходность' : 'Yield'}</a>
                 <a href="#defi" onClick={() => setIsMenuOpen(false)}>DEFI</a>
