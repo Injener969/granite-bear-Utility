@@ -110,6 +110,7 @@ export const translations = {
             liquidityDesc: "Станьте поставщиком ликвидности и получайте часть комиссий от каждой сделки.",
             chartTitle: "График GBU/AVAX",
             buyAnalytics: "DexScreener (Аналитика)",
+            dexHelp: "Если GBU не отображается на бирже: 1. Скопируйте адрес контракта из подвала сайта. 2. Вставьте его в поиск токенов на LFJ. 3. Нажмите 'Import'.",
             stats: {
                 volume: "Объем (24ч)",
                 liquidity: "Ликвидность",
@@ -119,7 +120,7 @@ export const translations = {
                 title: "ПРЯМАЯ ПОКУПКА / ПОПОЛНЕНИЕ",
                 desc: "Официальный смарт-контракт для покупки GBU напрямую за AVAX.",
                 inputLabel: "Сумма покупки (токенов):",
-                rateInfo: "Цена: $0.06 | Курс GBU/AVAX: 905",
+                rateInfo: "Цена: $0.06 | Курс GBU/AVAX: 166",
                 buyAvax: "КУПИТЬ GBU (AVAX)",
                 disconnect: "ОТКЛЮЧИТЬ КОШЕЛЕК",
                 successTitle: "ОПЛАТА ПРОШЛА УСПЕШНО!",
@@ -322,6 +323,7 @@ export const translations = {
             liquidityDesc: "Become a liquidity provider and earn a share of the fees from every trade.",
             chartTitle: "GBU/AVAX Chart",
             buyAnalytics: "DexScreener (Analytics)",
+            dexHelp: "If GBU is not visible: 1. Copy contract address from the footer. 2. Paste it into the search on LFJ. 3. Click 'Import'.",
             stats: {
                 volume: "Volume (24h)",
                 liquidity: "Liquidity",
@@ -331,7 +333,7 @@ export const translations = {
                 title: "PRE-SALE / GBU REFILL",
                 desc: "Official smart-contract for direct GBU purchase using AVAX.",
                 inputLabel: "Purchase Amount (tokens):",
-                rateInfo: "Price: $0.06 | GBU/AVAX rate: 905",
+                rateInfo: "Price: $0.06 | GBU/AVAX rate: 166",
                 buyAvax: "BUY GBU (AVAX)",
                 disconnect: "DISCONNECT WALLET",
                 successTitle: "PURCHASE SUCCESSFUL!",

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, AreaChart, Area, XAxis, YAxis } from 'recharts';
-import { Wallet, CheckCircle, BarChart3, X, MoreHorizontal, TrendingUp, Zap, Send, Mail } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
+import { Wallet, CheckCircle, BarChart3, X, MoreHorizontal, TrendingUp, Zap, Send, Mail, Maximize2, Minimize2 } from 'lucide-react';
 import './index.css';
 import { BrowserProvider, Contract, formatUnits, parseEther, parseUnits } from 'ethers';
 import { createWeb3Modal, defaultConfig, useWeb3Modal, useWeb3ModalAccount, useWeb3ModalProvider } from '@web3modal/ethers/react';
@@ -32,7 +32,7 @@ const metadata = {
   name: 'Granite Bear Utility',
   description: 'GBU RWA Utility Token Program',
   url: 'https://gbutoken.xyz',
-  icons: [`https://${window.location.host}/logo-main.jpg`]
+  icons: ['https://gbutoken.xyz/logo-main.jpg']
 };
 
 // 4. Create Ethers config
@@ -112,6 +112,7 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [expandedCoin, setExpandedCoin] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isChartExpanded, setIsChartExpanded] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [purchaseStatus, setPurchaseStatus] = useState<'idle' | 'processing' | 'success'>('idle');
   const [purchaseTxHash, setPurchaseTxHash] = useState('');
@@ -136,7 +137,7 @@ function App() {
     priceChange: 12.4
   });
 
-  const [newAvaxRate, setNewAvaxRate] = useState<number>(333);
+  const [newAvaxRate, setNewAvaxRate] = useState<number>(166);
   const [newUsdtRate, setNewUsdtRate] = useState<number>(16);
   const [replenishAmount, setReplenishAmount] = useState<number>(10000);
   const [withdrawGbuAmount, setWithdrawGbuAmount] = useState<number>(10000);
@@ -154,19 +155,19 @@ function App() {
   const [chartData, setChartData] = useState(() => {
     return Array.from({ length: 20 }, (_, i) => ({
       time: i,
-      price: 0.045 + Math.random() * 0.015
+      price: 0.055 + Math.random() * 0.01 // Starts near 0.06
     }));
   });
 
-  const [currentPrice, setCurrentPrice] = useState(0.0524);
+  const [currentPrice, setCurrentPrice] = useState(0.06);
 
   useEffect(() => {
     const interval = setInterval(() => {
       const lastPrice = chartData[chartData.length - 1].price;
-      const change = (Math.random() - 0.45) * 0.002; // Slightly bias upward for demo
+      const change = (Math.random() - 0.5) * 0.0005; // Minimal jitter
       const nextPrice = Number((lastPrice + change).toFixed(4));
-
-      setCurrentPrice(nextPrice);
+      
+      setCurrentPrice(nextPrice); 
       setChartData(prev => [...prev.slice(1), { time: prev[prev.length - 1].time + 1, price: nextPrice }]);
     }, 3000);
     return () => clearInterval(interval);
@@ -180,22 +181,22 @@ function App() {
         const data = await response.json();
 
         if (data.pairs && data.pairs.length > 0) {
-          const mainPair = data.pairs[0]; // Take the most liquid pair
+          const mainPair = data.pairs[0]; 
           setDefiStats({
             volume24h: mainPair.volume.h24 || 0,
             liquidityUSD: mainPair.liquidity.usd || 0,
             priceUSD: parseFloat(mainPair.priceUsd) || 0,
             priceChange: mainPair.priceChange.h24 || 0
           });
-          setCurrentPrice(parseFloat(mainPair.priceUsd) || 0.0524);
+          setCurrentPrice(parseFloat(mainPair.priceUsd) || 0.06);
         }
       } catch (err) {
-        console.warn("DexScreener API not ready or rate limited, using mock data...");
+        console.warn("DexScreener API not ready, using mock data...");
       }
     };
 
     fetchStats();
-    const statsInterval = setInterval(fetchStats, 60000); // Update every minute
+    const statsInterval = setInterval(fetchStats, 60000); 
     return () => clearInterval(statsInterval);
   }, []);
 
@@ -206,12 +207,20 @@ function App() {
     }
     try {
       const provider = new BrowserProvider(walletProvider);
-      const contract = new Contract(GBU_ADDRESS, GBU_ABI, provider);
-      const bal = await contract.balanceOf(address);
+      const gbuContract = new Contract(GBU_ADDRESS, GBU_ABI, provider);
+      const bal = await gbuContract.balanceOf(address);
       setBalance(formatUnits(bal, 18));
 
-      // Read current rates from the sale contract
-      
+      // Read current rates from the sale contract separately
+      try {
+        const saleContract = new Contract(GBU_SALE_ADDRESS, GBU_SALE_ABI, provider);
+        const arate = await saleContract.avaxRate();
+        const urate = await saleContract.usdtRate();
+        setNewAvaxRate(Number(arate));
+        setNewUsdtRate(Number(urate));
+      } catch (e) {
+        console.warn("Could not fetch rates from contract");
+      }
 
       // Check if owner and fetch stats
       let isOwner = false;
@@ -222,12 +231,12 @@ function App() {
       } catch (e) {
         // Fallback: check known deployer address
         isOwner = address.toLowerCase() === "0x6c18c4ba7e3b4574dd70e2c2a81b0a18321d039f";
-        console.warn("owner() call failed, using fallback address check");
+        console.warn("owner() call failed, using fallback check");
       }
 
       if (isOwner) {
         try {
-          // Fetch balances independently so one failure doesn't stop others
+          // Fetch balances independently
           let avaxBalStr = "0.0000";
           try {
             const avaxBal = await provider.getBalance(GBU_SALE_ADDRESS);
@@ -236,19 +245,18 @@ function App() {
 
           let gbuStoredStr = "0";
           try {
-            const gbuReserves = await contract.balanceOf(GBU_SALE_ADDRESS);
+            const gbuReserves = await gbuContract.balanceOf(GBU_SALE_ADDRESS);
             gbuStoredStr = parseFloat(formatUnits(gbuReserves, 18)).toLocaleString();
           } catch (e) { console.error("Admin GBU fetch error:", e); }
 
-          // USDT balance may fail on some USDT proxies — handle separately
-          let usdtBalStr = "N/A";
+          let usdtBalStr = "0.00";
           try {
-            const usdtContract = new Contract(USDT_ADDRESS, USDT_ABI, provider);
+            const usdtContract = new Contract(USDT_ADDRESS, ["function balanceOf(address) view returns (uint256)"], provider);
             const usdtBal = await usdtContract.balanceOf(GBU_SALE_ADDRESS);
             usdtBalStr = parseFloat(formatUnits(usdtBal, 6)).toFixed(2);
           } catch (usdtErr) {
-            console.warn("USDT balance read failed (proxy issue?)", usdtErr);
-            usdtBalStr = "err";
+            console.warn("USDT balance read failed:", usdtErr);
+            usdtBalStr = "0.00";
           }
 
           console.log("Admin stats synced:", { avax: avaxBalStr, usdt: usdtBalStr, gbu: gbuStoredStr });
@@ -570,12 +578,7 @@ function App() {
                 <div className="glass-card balance-tag" style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
                   {parseFloat(balance).toLocaleString()} GBU
                 </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); addTokenToWallet(); }}
-                  className="btn-add-token"
-                >
-                  +
-                </button>
+                
               </div>
             )}
 
@@ -583,8 +586,8 @@ function App() {
               <span style={{ fontSize: '0.6rem', color: '#81c784', textAlign: 'center', letterSpacing: '0.02em', maxWidth: '160px', lineHeight: '1.2' }}>
                 Прямой обмен Avax, USDT / GBU Avalanche C Chain
               </span>
-              <div style={{ display: 'flex', gap: '5px', width: '100%' }}>
-                <button className="btn-primary" onClick={() => open()} style={{ flex: 1 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', width: '100%' }}>
+                <button className="btn-primary" onClick={() => open()} style={{ width: '100%', height: '40px' }}>
                   <Wallet size={16} />
                   <span className="btn-text" style={{ fontSize: '0.8rem' }}>
                     {isConnected && address ? `${address.slice(0, 4)}...${address.slice(-3)}` : t.connectWallet}
@@ -594,10 +597,9 @@ function App() {
                   <button 
                     className="btn-bw" 
                     onClick={() => open({ view: 'Account' })} 
-                    title={t.defi.sale.disconnect}
-                    style={{ padding: '0 10px', height: '40px' }}
+                    style={{ width: '100%', height: '35px', fontSize: '0.75rem', border: '1px solid rgba(255,100,100,0.3)', color: '#ffaaaa' }}
                   >
-                    <X size={16} />
+                    {lang === 'RU' ? 'ОТКЛЮЧИТЬ' : 'DISCONNECT'}
                   </button>
                 )}
               </div>
@@ -721,59 +723,33 @@ function App() {
             <p style={{ color: 'var(--text-muted)', maxWidth: '700px', margin: '0 auto', fontSize: '0.9rem' }}>{t.defi.subtitle}</p>
           </div>
 
-          <div className="defi-grid" style={{ alignItems: 'stretch' }}>
+          <div className="defi-grid" style={{ alignItems: 'flex-start' }}>
             {/* Chart Block - Transparent with bottom glow */}
-            <div className="defi-transparent-card" style={{ padding: '30px' }}>
+            <div className="defi-transparent-card" style={{ padding: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
-                <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{t.defi.chartTitle}</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{t.defi.chartTitle}</h3>
+                  <button 
+                    onClick={() => setIsChartExpanded(true)}
+                    className="btn-social" 
+                    style={{ padding: '6px', borderRadius: '50%', width: '32px', height: '32px', minWidth: 'auto', border: '1px solid var(--accent-red)', color: 'var(--accent-red)' }}
+                    title="Expand Chart"
+                  >
+                    <Maximize2 size={16} />
+                  </button>
+                </div>
                 <div className="live-indicator">
                   <div className="dot"></div>
                   LIVE
                 </div>
               </div>
 
-              <div className="chart-wrapper-internal" style={{ height: '300px', background: 'rgba(5, 5, 16, 0.4)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)', padding: '15px' }}>
-                <div style={{ marginBottom: '15px', display: 'flex', gap: '20px' }}>
-                  <div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>GBU / AVAX</div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--accent-red)' }}>
-                      ${currentPrice.toFixed(4)}
-                      <span style={{ fontSize: '0.8rem', color: defiStats.priceChange >= 0 ? '#00ff88' : '#ff3b3f', marginLeft: '8px' }}>
-                        {defiStats.priceChange > 0 ? '+' : ''}{defiStats.priceChange}%
-                      </span>
-                    </div>
-                  </div>
-                  <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
-                    <TrendingUp color={defiStats.priceChange >= 0 ? "#00ff88" : "#ff3b3f"} size={24} />
-                  </div>
-                </div>
-
-                <ResponsiveContainer width="100%" height="80%">
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--accent-red)" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="var(--accent-red)" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="time" hide />
-                    <YAxis domain={['auto', 'auto']} hide />
-                    <RechartsTooltip
-                      contentStyle={{ background: '#050510', border: '1px solid var(--accent-red)', borderRadius: '8px' }}
-                      itemStyle={{ color: '#fff' }}
-                      labelStyle={{ display: 'none' }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="price"
-                      stroke="var(--accent-red)"
-                      strokeWidth={3}
-                      fillOpacity={1}
-                      fill="url(#colorPrice)"
-                      animationDuration={1500}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+              <div className="chart-wrapper-internal" style={{ height: '250px', background: 'rgba(5, 5, 16, 0.4)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+                <iframe 
+                  src="https://dexscreener.com/avalanche/0x1CE7d0BBB25008f2b6b7A1Cdc0c5A9BB7eDAb96D?embed=1&theme=dark&trades=0&info=0"
+                  style={{ width: '100%', height: '100%', border: 'none' }}
+                  title="GBU Chart"
+                />
               </div>
             </div>
 
@@ -782,14 +758,14 @@ function App() {
               {/* Buy Block */}
               <div className="defi-transparent-card defi-sub-card" style={{ padding: '20px' }}>
                 <div>
-                  <h3 style={{ fontSize: '1rem', color: 'var(--accent-red)', marginTop: 0 }}>{t.defi.buyTitle}</h3>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '10px 0 20px' }}>{t.defi.buyDesc}</p>
+                  <h3 style={{ fontSize: '1rem', color: 'var(--accent-red)', marginTop: 0 }}>{t.defi.liquidityTitle}</h3>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '10px 0 20px' }}>{t.defi.liquidityDesc}</p>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <a href={`https://lfj.gg/avalanche/pool/v1/0x1ce7d0bbb25008f2b6b7a1cdc0c5a9bb7edab96d/AVAX`} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ width: '100%', justifyContent: 'center', borderRadius: '50px', overflow: 'hidden' }}>
+                  <a href="https://lfj.gg/avalanche/swap?inputCurrency=AVAX&outputCurrency=0x1CE7d0BBB25008f2b6b7A1Cdc0c5A9BB7eDAb96D&utm_medium=referral&utm_campaign=redirect" target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ width: '100%', justifyContent: 'center', borderRadius: "50px" }}>
                     <TrendingUp size={18} style={{ marginRight: '8px' }} /> LFJ (DEX)
                   </a>
-                  <a href={`https://dexscreener.com/avalanche/${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-social" style={{ width: '100%', justifyContent: 'center', borderRadius: '50px', overflow: 'hidden' }}>
+                  <a href={`https://dexscreener.com/avalanche/${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-social" style={{ width: "100%", justifyContent: "center", borderRadius: "50px" }}>
                     <BarChart3 size={18} style={{ marginRight: '8px' }} /> {t.defi.buyAnalytics}
                   </a>
                 </div>
@@ -803,7 +779,7 @@ function App() {
                     Смарт-контракт GBU имеет открытый исходный код и подтвержден в сети Avalanche. Полный аудит и статистика в реальном времени.
                   </p>
                 </div>
-                <a href={`https://snowtrace.io/token/${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-social" style={{ width: '100%', borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)', justifyContent: 'center', borderRadius: '50px', overflow: 'hidden' }}>
+                <a href={`https://snowtrace.io/token/${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-social" style={{ width: "100%", borderColor: "var(--accent-gold)", color: "var(--accent-gold)", justifyContent: "center", borderRadius: "50px" }}>
                   Посмотреть на Snowtrace
                 </a>
               </div>
@@ -1429,13 +1405,7 @@ function App() {
                       >
                         {lang === 'RU' ? 'Закрыть' : 'Close'}
                       </button>
-                      <button
-                        onClick={() => open({ view: 'Account' })}
-                        className="btn-bw"
-                        style={{ flex: 1, height: '45px', border: '1px solid rgba(255,100,100,0.3)', color: '#ffaaaa' }}
-                      >
-                        {t.defi.sale.disconnect}
-                      </button>
+                      
                     </div>
                   </div>
 
@@ -1473,7 +1443,7 @@ function App() {
                         <input
                           type="number"
                           value={newAvaxRate}
-                          onChange={(e) => setNewAvaxRate(Number(e.target.value))}
+                          onChange={(e) => { setNewAvaxRate(Number(e.target.value)); }}
                           style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px', marginTop: '4px' }}
                         />
                       </div>
@@ -1482,7 +1452,7 @@ function App() {
                         <input
                           type="number"
                           value={newUsdtRate}
-                          onChange={(e) => setNewUsdtRate(Number(e.target.value))}
+                          onChange={(e) => { setNewUsdtRate(Number(e.target.value)); }}
                           style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px', marginTop: '4px' }}
                         />
                       </div>
@@ -1504,7 +1474,7 @@ function App() {
                         <input
                           type="number"
                           value={withdrawGbuAmount}
-                          onChange={(e) => setWithdrawGbuAmount(Number(e.target.value))}
+                          onChange={(e) => { setWithdrawGbuAmount(Number(e.target.value)); }}
                           style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px' }}
                         />
                         <button onClick={handleWithdrawGbu} className="btn-bw" style={{ padding: '8px 16px', fontSize: '0.75rem', border: '1px solid rgba(232,65,66,0.3)', color: '#ffaaaa' }}>
@@ -1520,7 +1490,7 @@ function App() {
                         <input
                           type="number"
                           value={replenishAmount}
-                          onChange={(e) => setReplenishAmount(Number(e.target.value))}
+                          onChange={(e) => { setReplenishAmount(Number(e.target.value)); }}
                           style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px' }}
                         />
                         <button onClick={handleReplenishGbu} className="btn-bw" style={{ padding: '8px 16px', fontSize: '0.75rem', border: '1px solid rgba(38,161,123,0.3)', color: '#81c784' }}>
@@ -1567,7 +1537,49 @@ function App() {
         )}
       </AnimatePresence>
 
-    </div >
+
+      {/* EXPANDED CHART MODAL */}
+      <AnimatePresence>
+        {isChartExpanded && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ 
+              position: 'fixed', 
+              top: 0, 
+              left: 0, 
+              right: 0, 
+              bottom: 0, 
+              zIndex: 9999, 
+              background: 'rgba(5, 5, 16, 0.95)', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              padding: '20px' 
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h2 style={{ margin: 0, color: 'var(--accent-red)' }}>{translations[lang].defi.chartTitle} - GBU / AVAX</h2>
+              <button 
+                onClick={() => setIsChartExpanded(false)}
+                className="btn-social" 
+                style={{ padding: '10px 20px', borderRadius: '50px', background: 'var(--accent-red)', borderColor: 'var(--accent-red)', color: 'white' }}
+              >
+                <Minimize2 size={20} style={{ marginRight: '8px' }} /> {lang === 'RU' ? 'ЗАКРЫТЬ' : 'CLOSE'}
+              </button>
+            </div>
+            <div style={{ flex: 1, borderRadius: '20px', overflow: 'hidden', border: '2px solid var(--glass-border)', background: '#050510' }}>
+              <iframe 
+                src="https://dexscreener.com/avalanche/0x1CE7d0BBB25008f2b6b7A1Cdc0c5A9BB7eDAb96D?embed=1&theme=dark"
+                style={{ width: '100%', height: '100%', border: 'none' }}
+                title="GBU Expanded Chart"
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+    </div>
   );
 }
 

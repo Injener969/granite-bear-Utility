@@ -333,7 +333,7 @@ h6 {
   display: flex;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--glass-border);
-  border-radius: 50px;
+  border-radius: 50px !important;
   padding: 2px;
 }
 
@@ -731,7 +731,7 @@ footer {
   z-index: 1000;
   background: rgba(10, 10, 25, 0.95);
   border: 1px solid rgba(232, 65, 66, 0.4);
-  border-radius: 50px;
+  border-radius: 50px !important;
   padding: 3px;
   display: flex;
   gap: 2px;
@@ -1038,7 +1038,7 @@ footer {
   grid-template-columns: 1fr 320px;
   gap: 30px;
   margin-top: 20px;
-  max-width: 1000px;
+  max-width: 850px;
   /* NARROWER HUB */
   margin-left: auto;
   margin-right: auto;
@@ -1051,7 +1051,7 @@ footer {
 
 @media (min-width: 993px) {
   .chart-wrapper-internal {
-    height: 320px !important;
+    height: 250px !important;
   }
 }
 
