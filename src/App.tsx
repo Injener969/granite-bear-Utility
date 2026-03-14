@@ -599,15 +599,7 @@ function App() {
                     {isConnected && address ? `${address.slice(0, 4)}...${address.slice(-3)}` : t.connectWallet}
                   </span>
                 </button>
-                {isConnected && (
-                  <button 
-                    className="btn-bw" 
-                    onClick={() => open({ view: 'Account' })} 
-                    style={{ width: '100%', height: '35px', fontSize: '0.75rem', border: '1px solid rgba(255,100,100,0.3)', color: '#ffaaaa' }}
-                  >
-                    {lang === 'RU' ? 'ОТКЛЮЧИТЬ' : 'DISCONNECT'}
-                  </button>
-                )}
+
               </div>
             </div>
           </div>
