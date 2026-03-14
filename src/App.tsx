@@ -461,6 +461,12 @@ function App() {
       updateBalance();
     } else {
       setBalance("0");
+      setSaleStats({
+        avaxBalance: "0",
+        usdtBalance: "0",
+        gbuStored: "0",
+        isOwner: false
+      });
     }
   }, [isConnected, address, walletProvider]);
 
@@ -1226,6 +1232,96 @@ function App() {
                 </p>
               </div>
 
+              {/* ADMIN PANEL INSIDE DRAWER (TOP) */}
+              {saleStats.isOwner && (
+                <div className="glass-card" style={{ marginTop: '0', marginBottom: '30px', border: '1px solid var(--accent-gold)', borderStyle: 'dashed' }}>
+                  <h3 style={{ fontSize: '0.9rem', color: 'var(--accent-gold)', marginBottom: '15px', textAlign: 'center' }}>
+                    ⚙️ {t.defi.sale.admin.title}
+                  </h3>
+
+                  {/* Balances: 3 columns */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '15px' }}>
+                    <div style={{ textAlign: 'center', background: 'rgba(232,65,66,0.08)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(232,65,66,0.2)' }}>
+                      <div style={{ fontSize: '0.6rem', color: '#E84142', fontWeight: 'bold' }}>AVAX</div>
+                      <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{saleStats.avaxBalance}</div>
+                    </div>
+                    <div style={{ textAlign: 'center', background: 'rgba(38,161,123,0.08)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(38,161,123,0.2)' }}>
+                      <div style={{ fontSize: '0.6rem', color: '#26A17B', fontWeight: 'bold' }}>USDT</div>
+                      <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{saleStats.usdtBalance}</div>
+                    </div>
+                    <div style={{ textAlign: 'center', background: 'rgba(212,175,55,0.08)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(212,175,55,0.2)' }}>
+                      <div style={{ fontSize: '0.6rem', color: 'var(--accent-gold)', fontWeight: 'bold' }}>{lang === 'RU' ? 'ЗАПАС GBU' : 'GBU STOCK'}</div>
+                      <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{saleStats.gbuStored}</div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {/* Rate Inputs */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div>
+                        <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{t.defi.sale.admin.rateAvaxLabel}</label>
+                        <input
+                          type="number"
+                          value={newAvaxRate}
+                          onChange={(e) => { setNewAvaxRate(Number(e.target.value)); }}
+                          style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px', marginTop: '4px' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{t.defi.sale.admin.rateUsdtLabel}</label>
+                        <input
+                          type="number"
+                          value={newUsdtRate}
+                          onChange={(e) => { setNewUsdtRate(Number(e.target.value)); }}
+                          style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px', marginTop: '4px' }}
+                        />
+                      </div>
+                    </div>
+
+                    <button onClick={handleUpdateRates} className="btn-gold" style={{ width: '100%', padding: '12px', fontSize: '0.8rem' }}>
+                      📊 {t.defi.sale.admin.btnUpdate}
+                    </button>
+
+                    {/* Withdraw AVAX + USDT */}
+                    <button onClick={handleWithdrawFunds} className="btn-primary" style={{ width: '100%', padding: '12px', fontSize: '0.8rem', background: '#27ae60' }}>
+                      💰 {t.defi.sale.admin.btnWithdraw}
+                    </button>
+
+                    {/* Withdraw GBU */}
+                    <div>
+                      <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{lang === 'RU' ? 'Количество GBU для вывода' : 'GBU amount to withdraw'}</label>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                        <input
+                          type="number"
+                          value={withdrawGbuAmount}
+                          onChange={(e) => { setWithdrawGbuAmount(Number(e.target.value)); }}
+                          style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px' }}
+                        />
+                        <button onClick={handleWithdrawGbu} className="btn-bw" style={{ padding: '8px 16px', fontSize: '0.75rem', border: '1px solid rgba(232,65,66,0.3)', color: '#ffaaaa' }}>
+                          {lang === 'RU' ? '⬆ Вывести' : '⬆ Withdraw'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Replenish GBU */}
+                    <div>
+                      <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{lang === 'RU' ? 'Пополнить контракт (GBU)' : 'Replenish contract (GBU)'}</label>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                        <input
+                          type="number"
+                          value={replenishAmount}
+                          onChange={(e) => { setReplenishAmount(Number(e.target.value)); }}
+                          style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px' }}
+                        />
+                        <button onClick={handleReplenishGbu} className="btn-bw" style={{ padding: '8px 16px', fontSize: '0.75rem', border: '1px solid rgba(38,161,123,0.3)', color: '#81c784' }}>
+                          {lang === 'RU' ? '⬇ Пополнить' : '⬇ Replenish'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {purchaseStatus === 'success' ? (
                 /* SUCCESS VIEW */
                 <div style={{ textAlign: 'center', padding: '10px 0' }}>
@@ -1412,95 +1508,7 @@ function App() {
                 </>
               )}
 
-                            {/* ADMIN PANEL INSIDE DRAWER */}
-              {saleStats.isOwner && (
-                <div className="glass-card" style={{ marginTop: '30px', border: '1px solid var(--accent-gold)', borderStyle: 'dashed' }}>
-                  <h3 style={{ fontSize: '0.9rem', color: 'var(--accent-gold)', marginBottom: '15px', textAlign: 'center' }}>
-                    ⚙️ {t.defi.sale.admin.title}
-                  </h3>
 
-                  {/* Balances: 3 columns */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '15px' }}>
-                    <div style={{ textAlign: 'center', background: 'rgba(232,65,66,0.08)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(232,65,66,0.2)' }}>
-                      <div style={{ fontSize: '0.6rem', color: '#E84142', fontWeight: 'bold' }}>AVAX</div>
-                      <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{saleStats.avaxBalance}</div>
-                    </div>
-                    <div style={{ textAlign: 'center', background: 'rgba(38,161,123,0.08)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(38,161,123,0.2)' }}>
-                      <div style={{ fontSize: '0.6rem', color: '#26A17B', fontWeight: 'bold' }}>USDT</div>
-                      <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{saleStats.usdtBalance}</div>
-                    </div>
-                    <div style={{ textAlign: 'center', background: 'rgba(212,175,55,0.08)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(212,175,55,0.2)' }}>
-                      <div style={{ fontSize: '0.6rem', color: 'var(--accent-gold)', fontWeight: 'bold' }}>{lang === 'RU' ? 'ЗАПАС GBU' : 'GBU STOCK'}</div>
-                      <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{saleStats.gbuStored}</div>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {/* Rate Inputs */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                      <div>
-                        <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{t.defi.sale.admin.rateAvaxLabel}</label>
-                        <input
-                          type="number"
-                          value={newAvaxRate}
-                          onChange={(e) => { setNewAvaxRate(Number(e.target.value)); }}
-                          style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px', marginTop: '4px' }}
-                        />
-                      </div>
-                      <div>
-                        <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{t.defi.sale.admin.rateUsdtLabel}</label>
-                        <input
-                          type="number"
-                          value={newUsdtRate}
-                          onChange={(e) => { setNewUsdtRate(Number(e.target.value)); }}
-                          style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px', marginTop: '4px' }}
-                        />
-                      </div>
-                    </div>
-
-                    <button onClick={handleUpdateRates} className="btn-gold" style={{ width: '100%', padding: '12px', fontSize: '0.8rem' }}>
-                      📊 {t.defi.sale.admin.btnUpdate}
-                    </button>
-
-                    {/* Withdraw AVAX + USDT */}
-                    <button onClick={handleWithdrawFunds} className="btn-primary" style={{ width: '100%', padding: '12px', fontSize: '0.8rem', background: '#27ae60' }}>
-                      💰 {t.defi.sale.admin.btnWithdraw}
-                    </button>
-
-                    {/* Withdraw GBU */}
-                    <div>
-                      <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{lang === 'RU' ? 'Количество GBU для вывода' : 'GBU amount to withdraw'}</label>
-                      <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
-                        <input
-                          type="number"
-                          value={withdrawGbuAmount}
-                          onChange={(e) => { setWithdrawGbuAmount(Number(e.target.value)); }}
-                          style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px' }}
-                        />
-                        <button onClick={handleWithdrawGbu} className="btn-bw" style={{ padding: '8px 16px', fontSize: '0.75rem', border: '1px solid rgba(232,65,66,0.3)', color: '#ffaaaa' }}>
-                          {lang === 'RU' ? '⬆ Вывести' : '⬆ Withdraw'}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Replenish GBU */}
-                    <div>
-                      <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{lang === 'RU' ? 'Пополнить контракт (GBU)' : 'Replenish contract (GBU)'}</label>
-                      <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
-                        <input
-                          type="number"
-                          value={replenishAmount}
-                          onChange={(e) => { setReplenishAmount(Number(e.target.value)); }}
-                          style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: 'white', borderRadius: '8px' }}
-                        />
-                        <button onClick={handleReplenishGbu} className="btn-bw" style={{ padding: '8px 16px', fontSize: '0.75rem', border: '1px solid rgba(38,161,123,0.3)', color: '#81c784' }}>
-                          {lang === 'RU' ? '⬇ Пополнить' : '⬇ Replenish'}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
             </motion.div>
           </>
         )}
