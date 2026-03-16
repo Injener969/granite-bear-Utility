@@ -1594,15 +1594,16 @@ function App() {
                   <span>{t.nav.roadmap}</span>
                 </a>
 
-                <button 
+                <a 
+                  href="#loyalty" 
                   className="mobile-nav-btn menu-promo-btn"
-                  onClick={() => { setIsMenuOpen(false); open(); }}
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   <Zap size={24} className="promo-zap-icon" />
                   <span className="promo-btn-text">
                     {lang === 'RU' ? 'ПОДКЛЮЧИ КОШЕЛЕК И ПОЛУЧИ 60 GBU' : 'CONNECT WALLET & GET 60 GBU'}
                   </span>
-                </button>
+                </a>
               </div>
 
               <div className="lang-switch modal-lang-switch">
