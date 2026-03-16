@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
-import { Wallet, CheckCircle, BarChart3, X, TrendingUp, Zap, Send, Mail, Maximize2, Minimize2, ExternalLink, Coins } from 'lucide-react';
+import { Wallet, CheckCircle, BarChart3, X, TrendingUp, Zap, Send, Mail, Maximize2, Minimize2, Coins, Users, ShieldCheck } from 'lucide-react';
 import './index.css';
 import { BrowserProvider, Contract, formatUnits, parseEther, parseUnits } from 'ethers';
 import { createWeb3Modal, defaultConfig, useWeb3Modal, useWeb3ModalAccount, useWeb3ModalProvider } from '@web3modal/ethers/react';
@@ -197,7 +197,7 @@ function App() {
     };
 
     fetchStats();
-    const statsInterval = setInterval(fetchStats, 60000); 
+    const statsInterval = setInterval(fetchStats, 300000); 
     return () => clearInterval(statsInterval);
   }, []);
 
@@ -212,16 +212,6 @@ function App() {
       const bal = await gbuContract.balanceOf(address);
       setBalance(formatUnits(bal, 18));
 
-      // Read current rates from the sale contract separately
-      try {
-        const saleContract = new Contract(GBU_SALE_ADDRESS, GBU_SALE_ABI, provider);
-        const arate = await saleContract.avaxRate();
-        const urate = await saleContract.usdtRate();
-        setNewAvaxRate(Number(arate));
-        setNewUsdtRate(Number(urate));
-      } catch {
-        console.warn("Could not fetch rates from contract");
-      }
 
       // Check if owner and fetch stats
       let isOwner = false;
@@ -585,36 +575,28 @@ function App() {
             <span className="pulsing-text">GRANITE BEAR UTILITY</span>
           </div>
 
-          {/* RIGHT: WALLET */}
+          {/* RIGHT: WALLET & BUY */}
           <div className="header-right header-right-flex">
-            <div className="header-actions-row">
+            {!isConnected && (
               <button 
-                className="btn-emerald btn-bonus" 
+                className="desktop-only btn-gold header-buy-btn"
                 onClick={() => setIsDrawerOpen(true)}
-                title={lang === 'RU' ? "Получить Бонус" : "Get Bonus"}
               >
-                {lang === 'RU' ? 'БОНУС' : 'BONUS'}
+                <Zap size={16} /> {lang === 'RU' ? 'КУПИТЬ GBU' : 'BUY GBU'}
               </button>
-
-              {isConnected && address && (
-                <div
-                  className="balance-wrapper balance-wrapper-clickable"
-                  onClick={() => setIsDrawerOpen(true)}
-                >
-                  <div className="glass-card balance-tag balance-tag-compact">
-                    {parseFloat(balance).toLocaleString()} GBU
-                  </div>
-                </div>
-              )}
-
-              <button 
-                className="btn-cyan btn-import" 
-                onClick={addTokenToWallet}
-                title={lang === 'RU' ? "Импортировать GBU в кошелек" : "Import GBU to wallet"}
+            )}
+            
+            {isConnected && address && (
+              <button
+                className="btn-buy-header"
+                onClick={() => setIsDrawerOpen(true)}
               >
-                {lang === 'RU' ? 'ИМПОРТ GBU' : 'IMPORT GBU'}
+                <Zap size={14} className="color-accent-loyalty" />
+                <span className="btn-buy-text">{lang === 'RU' ? 'КУПИТЬ' : 'BUY'}</span>
+                <div className="divider-vertical" />
+                <span className="balance-value">{parseFloat(balance).toLocaleString()} GBU</span>
               </button>
-            </div>
+            )}
 
             <div className="header-wallet-column">
               <span className="exchange-hint-text">
@@ -644,7 +626,6 @@ function App() {
             {t.hero.subtitle}
           </motion.p>
           <motion.div className="hero-buttons" initial="hidden" animate="visible" variants={fadeUp} transition={{ delay: 0.4 }}>
-            {/* Redundant upper WP button removed as requested */}
           </motion.div>
           <motion.div className="hero-stats hero-stats-flex" initial="hidden" animate="visible" variants={fadeUp} transition={{ delay: 0.6 }}>
             <div className="stat-item glass-card stat-item-padding">
@@ -741,85 +722,94 @@ function App() {
             <p className="feature-desc-muted">{t.defi.subtitle}</p>
           </div>
 
-          <div className="defi-grid defi-grid-start">
-            {/* Chart Block - Transparent with bottom glow */}
+          <div className="defi-grid">
+            {/* Left Column: Live Chart */}
             <div className="defi-transparent-card defi-card-padding">
               <div className="defi-chart-header">
                 <div className="defi-title-with-btn">
-                  <h3 className="defi-title-small">{t.defi.chartTitle}</h3>
-                  <button 
-                    onClick={() => setIsChartFullscreen(true)}
-                    className="btn-social btn-expand-chart" 
-                    title="Expand Chart"
-                  >
-                    <Maximize2 size={16} />
-                  </button>
+                  <h3 className="defi-title-small">GBU / AVAX LIVE</h3>
+                  <div className="live-indicator">
+                    <span className="dot"></span> LIVE
+                  </div>
                 </div>
-                <div className="live-indicator">
-                  <div className="dot"></div>
-                  LIVE
-                </div>
+                <button 
+                  onClick={() => setIsChartFullscreen(true)} 
+                  className="btn-bw btn-expand-chart"
+                  title={lang === 'RU' ? "Развернуть график" : "Expand chart"}
+                >
+                  <Maximize2 size={16} />
+                </button>
               </div>
-
-              <div className="chart-wrapper-internal chart-container-internal">
+              
+              <div className="chart-container-internal">
                 <iframe 
                   src={`https://dexscreener.com/avalanche/${GBU_ADDRESS}?embed=1&theme=dark&trades=0&info=0`}
-                  className="chart-iframe-style"
+                  className="chart-iframe"
                   title="GBU Chart"
                 />
               </div>
+              <div className="margin-top-15 text-center">
+                <a 
+                  href={`https://dexscreener.com/avalanche/${GBU_ADDRESS}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="btn-social padding-8-20 text-decoration-none"
+                >
+                  <BarChart3 size={14} className="margin-right-8" /> {lang === 'RU' ? 'ОТКРЫТЬ В DEXSCREENER' : 'OPEN IN DEXSCREENER'}
+                </a>
+              </div>
             </div>
 
-            {/* Right Column with two equal blocks */}
+            {/* Right Column: Actions & Stats */}
             <div className="defi-actions-column">
               {/* Market Hub */}
-              <div className="defi-transparent-card defi-sub-card defi-sub-card-padding">
-                <h3 className="section-title-sm margin-bottom-15">{t.defi.marketHub}</h3>
+              <div className="defi-transparent-card defi-sub-card-padding margin-bottom-20">
+                <h3 className="defi-sub-card-title glow-green-text">{t.defi.marketHub}</h3>
+                <p className="defi-sub-card-desc margin-bottom-15">
+                  {lang === 'RU' ? 'Добавь ликвидность и получай % с комиссии' : 'Add liquidity and earn % from fees'}
+                </p>
                 <div className="flex-col-gap-12">
                   <a 
                     href={`https://lfj.gg/avalanche/trade?outputCurrency=${GBU_ADDRESS}`}
                     target="_blank" 
-                    className="btn-bw flex-row-center-gap-8 text-decoration-none"
+                    rel="noopener noreferrer"
+                    className="btn-cyan btn-full-width-round text-decoration-none"
                   >
-                    <TrendingUp size={18} className="defi-icon-margin" /> LFJ (DEX)
+                    <Users size={18} className="defi-icon-margin" /> {lang === 'RU' ? 'ХОЛДЕРЫ' : 'HOLDERS'}
                   </a>
-                  <button onClick={() => setIsChartFullscreen(true)} className="btn-bw flex-row-center-gap-8">
-                    <BarChart3 size={18} className="defi-icon-margin" /> {t.defi.buyAnalytics}
-                  </button>
                 </div>
               </div>
 
-              {/* Transparency Block */}
-              <div className="defi-transparent-card defi-sub-card defi-sub-card-padding">
-                <h3 className="section-title-sm margin-bottom-15">{t.defi.transparencyTitle}</h3>
-                <p className="text-muted-color margin-bottom-15">{t.defi.transparencyDesc}</p>
-                <a href={`https://snowtrace.io/token/${GBU_ADDRESS}`} target="_blank" rel="noopener noreferrer" className="btn-bw flex-row-center-gap-8 text-decoration-none">
-                  <ExternalLink size={18} className="defi-icon-margin" /> {t.defi.snowtrace}
-                </a>
+              {/* Transparency */}
+              <div className="defi-transparent-card defi-sub-card-padding margin-bottom-20">
+                <h3 className="defi-sub-card-title-gold">{t.defi.transparencyTitle}</h3>
+                <p className="defi-sub-card-desc margin-bottom-15">{t.defi.transparencyDesc}</p>
+                <div className="flex-col-gap-12">
+                  <a 
+                    href={`https://snowtrace.io/token/${GBU_ADDRESS}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="btn-purple btn-full-width-round text-decoration-none"
+                  >
+                    <ShieldCheck size={18} className="defi-icon-margin" /> CONTRACT
+                  </a>
+                </div>
               </div>
 
               {/* Stats Grid */}
-              <div className="defi-stats-mini defi-mini-stats-grid">
+              <div className="defi-mini-stats-grid">
                 <div className="defi-transparent-card mini-stat-unit-padding">
                   <div className="mini-stat-label-text">{t.defi.stats.volume}</div>
                   <div className="mini-stat-value-text">${defiStats.volume24h.toLocaleString()}</div>
                 </div>
                 <div className="defi-transparent-card mini-stat-unit-padding">
-                  <div className="mini-stat-label-text">{t.defi.stats.liquidity}</div>
-                  <div className="mini-stat-value-text">${(defiStats.liquidityUSD / 1000).toFixed(1)}k+</div>
+                  <div className="mini-stat-label-text">{t.defi.stats.marketcap}</div>
+                  <div className="mini-stat-value-text">${Math.floor(defiStats.priceUSD * 969000000 / 1000).toLocaleString()}k</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="defi-section-footer">
-            <button 
-              onClick={() => setIsDrawerOpen(true)} 
-              className="btn-primary btn-defi-action-main"
-            >
-              <Wallet size={18} className="margin-right-8" /> {t.defi.connectWallet}
-            </button>
-          </div>
         </div>
       </section>
 
@@ -1248,6 +1238,13 @@ function App() {
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="modal-panel-fixed"
             >
+              <button 
+                onClick={() => setIsDrawerOpen(false)} 
+                className="drawer-close-btn-fancy"
+                aria-label={lang === 'RU' ? "Закрыть" : "Close"}
+              >
+                <X size={24} />
+              </button>
               <div className="modal-drag-handle" />
 
               <div className="modal-header-box">
@@ -1259,101 +1256,25 @@ function App() {
                 </p>
               </div>
 
-              {/* ADMIN PANEL INSIDE DRAWER (TOP) */}
-              {saleStats.isOwner && (
-                <div className="glass-card margin-bottom-30 gold-dashed-border">
-                  <h3 className="admin-card-header">
-                    ⚙️ {t.defi.sale.admin.title}
-                  </h3>
-
-                  {/* Balances: 3 columns */}
-                  <div className="admin-balances-grid">
-                    <div className="admin-balance-box admin-balance-avax">
-                      <div className="admin-label-red">AVAX</div>
-                      <div className="admin-value-bold">{saleStats.avaxBalance}</div>
-                    </div>
-                    <div className="admin-balance-box admin-balance-usdt">
-                      <div className="admin-label-emerald">USDT</div>
-                      <div className="admin-value-bold">{saleStats.usdtBalance}</div>
-                    </div>
-                    <div className="admin-balance-box admin-balance-gbu">
-                      <div className="admin-label-gold">{lang === 'RU' ? 'ЗАПАС GBU' : 'GBU STOCK'}</div>
-                      <div className="admin-value-bold">{saleStats.gbuStored}</div>
-                    </div>
-                  </div>
-
-                  <div className="admin-flex-col-gap-12">
-                    {/* Rate Inputs */}
-                    <div className="admin-input-grid">
-                      <div>
-                        <label htmlFor="avax-rate" className="admin-input-label">{t.defi.sale.admin.rateAvaxLabel}</label>
-                        <input
-                          id="avax-rate"
-                          type="number"
-                          value={newAvaxRate}
-                          onChange={(e) => { setNewAvaxRate(Number(e.target.value)); }}
-                          className="admin-input-field"
-                          placeholder="AVAX Rate"
-                          title="Avalanche to GBU convert rate"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="usdt-rate" className="admin-input-label">{t.defi.sale.admin.rateUsdtLabel}</label>
-                        <input
-                          id="usdt-rate"
-                          type="number"
-                          value={newUsdtRate}
-                          onChange={(e) => { setNewUsdtRate(Number(e.target.value)); }}
-                          className="admin-input-field"
-                          placeholder="USDT Rate"
-                          title="USDT to GBU convert rate"
-                        />
-                      </div>
-                    </div>
-
-                    <button onClick={handleUpdateRates} className="btn-gold btn-padding-12-text-08 admin-full-width">
-                      📊 {t.defi.sale.admin.btnUpdate}
-                    </button>
-
-                    {/* Withdraw AVAX + USDT */}
-                    <button onClick={handleWithdrawFunds} className="btn-primary admin-btn-withdraw">
-                      💰 {t.defi.sale.admin.btnWithdraw}
-                    </button>
-
-                    {/* Withdraw GBU */}
-                    <div>
-                      <label htmlFor="withdraw-gbu" className="admin-input-label">{lang === 'RU' ? 'Количество GBU для вывода' : 'GBU amount to withdraw'}</label>
-                      <div className="admin-action-row">
-                        <input
-                          id="withdraw-gbu"
-                          type="number"
-                          value={withdrawGbuAmount}
-                          onChange={(e) => { setWithdrawGbuAmount(Number(e.target.value)); }}
-                          className="admin-input-field margin-0 flex-1"
-                        />
-                        <button onClick={handleWithdrawGbu} className="btn-bw admin-btn-action admin-btn-withdraw-gbu">
-                          {lang === 'RU' ? '⬆ Вывести' : '⬆ Withdraw'}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Replenish GBU */}
-                    <div>
-                      <label htmlFor="replenish-gbu" className="admin-input-label">{lang === 'RU' ? 'Пополнить контракт (GBU)' : 'Replenish contract (GBU)'}</label>
-                      <div className="admin-action-row">
-                        <input
-                          id="replenish-gbu"
-                          type="number"
-                          value={replenishAmount}
-                          onChange={(e) => { setReplenishAmount(Number(e.target.value)); }}
-                          className="admin-input-field margin-0 flex-1"
-                        />
-                        <button onClick={handleReplenishGbu} className="btn-bw admin-btn-action admin-btn-replenish">
-                          {lang === 'RU' ? '⬇ Пополнить' : '⬇ Replenish'}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+              {/* PREMIUM ACTIONS GRID (Bonus & Import) - Only when connected */}
+              {isConnected && purchaseStatus !== 'success' && (
+                <div className="premium-actions-grid">
+                  <button 
+                    className="btn-premium-action btn-bonus-gold"
+                    onClick={() => {
+                        // Bonus logic could go here or just keep the drawer open
+                    }}
+                  >
+                    <Zap size={20} />
+                    <span>{lang === 'RU' ? 'БОНУС' : 'BONUS'}</span>
+                  </button>
+                  <button 
+                    className="btn-premium-action btn-import-cyan"
+                    onClick={addTokenToWallet}
+                  >
+                    <Coins size={20} />
+                    <span>{lang === 'RU' ? 'ИМПОРТ GBU' : 'IMPORT GBU'}</span>
+                  </button>
                 </div>
               )}
 
@@ -1394,7 +1315,17 @@ function App() {
                   <div className="glass-card buy-balance-card">
                     <div className="buy-balance-header">
                       <span className="buy-balance-label">{lang === 'RU' ? 'Ваш баланс:' : 'Your balance:'}</span>
-                      <button onClick={addTokenToWallet} className="btn-add-token padding-2-8-font-10">+ IMPORT GBU</button>
+                      <div className="flex-row-gap-8">
+                        <button 
+                          onClick={() => { setIsDrawerOpen(false); window.location.hash = 'loyalty'; }} 
+                          className="btn-emerald padding-4-12-font-10"
+                        >
+                          {lang === 'RU' ? 'БОНУС' : 'BONUS'}
+                        </button>
+                        <button onClick={addTokenToWallet} className="btn-cyan padding-4-12-font-10">
+                          {lang === 'RU' ? 'ИМПОРТ GBU' : 'IMPORT GBU'}
+                        </button>
+                      </div>
                     </div>
                     <div className="buy-balance-value">
                       {parseFloat(balance).toLocaleString()} GBU
@@ -1517,6 +1448,104 @@ function App() {
                   </div>
                 </>
               )}
+
+              {/* ADMIN PANEL INSIDE DRAWER (BOTTOM) */}
+              {saleStats.isOwner && (
+                <div className="glass-card margin-top-30 gold-dashed-border">
+                  <h3 className="admin-card-header">
+                    ⚙️ {t.defi.sale.admin.title}
+                  </h3>
+
+                  {/* Balances: 3 columns */}
+                  <div className="admin-balances-grid">
+                    <div className="admin-balance-box admin-balance-avax">
+                      <div className="admin-label-red">AVAX</div>
+                      <div className="admin-value-bold">{saleStats.avaxBalance}</div>
+                    </div>
+                    <div className="admin-balance-box admin-balance-usdt">
+                      <div className="admin-label-emerald">USDT</div>
+                      <div className="admin-value-bold">{saleStats.usdtBalance}</div>
+                    </div>
+                    <div className="admin-balance-box admin-balance-gbu">
+                      <div className="admin-label-gold">{lang === 'RU' ? 'ЗАПАС GBU' : 'GBU STOCK'}</div>
+                      <div className="admin-value-bold">{saleStats.gbuStored}</div>
+                    </div>
+                  </div>
+
+                  <div className="admin-flex-col-gap-12">
+                    {/* Rate Inputs */}
+                    <div className="admin-input-grid">
+                      <div>
+                        <label htmlFor="avax-rate" className="admin-input-label">{t.defi.sale.admin.rateAvaxLabel}</label>
+                        <input
+                          id="avax-rate"
+                          type="number"
+                          value={newAvaxRate}
+                          onChange={(e) => { setNewAvaxRate(Number(e.target.value)); }}
+                          className="admin-input-field"
+                          placeholder="AVAX Rate"
+                          title="Avalanche to GBU convert rate"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="usdt-rate" className="admin-input-label">{t.defi.sale.admin.rateUsdtLabel}</label>
+                        <input
+                          id="usdt-rate"
+                          type="number"
+                          value={newUsdtRate}
+                          onChange={(e) => { setNewUsdtRate(Number(e.target.value)); }}
+                          className="admin-input-field"
+                          placeholder="USDT Rate"
+                          title="USDT to GBU convert rate"
+                        />
+                      </div>
+                    </div>
+
+                    <button onClick={handleUpdateRates} className="btn-gold btn-padding-12-text-08 admin-full-width">
+                      📊 {t.defi.sale.admin.btnUpdate}
+                    </button>
+
+                    {/* Withdraw AVAX + USDT */}
+                    <button onClick={handleWithdrawFunds} className="btn-primary admin-btn-withdraw">
+                      💰 {t.defi.sale.admin.btnWithdraw}
+                    </button>
+
+                    {/* Withdraw GBU */}
+                    <div>
+                      <label htmlFor="withdraw-gbu" className="admin-input-label">{lang === 'RU' ? 'Количество GBU для вывода' : 'GBU amount to withdraw'}</label>
+                      <div className="admin-action-row">
+                        <input
+                          id="withdraw-gbu"
+                          type="number"
+                          value={withdrawGbuAmount}
+                          onChange={(e) => { setWithdrawGbuAmount(Number(e.target.value)); }}
+                          className="admin-input-field margin-0 flex-1"
+                        />
+                        <button onClick={handleWithdrawGbu} className="btn-bw admin-btn-action admin-btn-withdraw-gbu">
+                          {lang === 'RU' ? '⬆ Вывести' : '⬆ Withdraw'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Replenish GBU */}
+                    <div>
+                      <label htmlFor="replenish-gbu" className="admin-input-label">{lang === 'RU' ? 'Пополнить контракт (GBU)' : 'Replenish contract (GBU)'}</label>
+                      <div className="admin-action-row">
+                        <input
+                          id="replenish-gbu"
+                          type="number"
+                          value={replenishAmount}
+                          onChange={(e) => { setReplenishAmount(Number(e.target.value)); }}
+                          className="admin-input-field margin-0 flex-1"
+                        />
+                        <button onClick={handleReplenishGbu} className="btn-bw admin-btn-action admin-btn-replenish">
+                          {lang === 'RU' ? '⬇ Пополнить' : '⬇ Replenish'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </motion.div>
           </>
         )}
@@ -1539,36 +1568,46 @@ function App() {
                 <X size={32} />
               </button>
 
-              <div className="mobile-menu-links">
-                <a href="#about" onClick={() => setIsMenuOpen(false)}>
-                  <CheckCircle size={20} />
+              <div className="mobile-nav-grid">
+                <a href="#about" className="mobile-nav-btn" onClick={() => setIsMenuOpen(false)}>
+                  <CheckCircle size={22} />
                   <span>{t.nav.about}</span>
                 </a>
-                <a href="#yield" onClick={() => setIsMenuOpen(false)}>
-                  <TrendingUp size={20} />
+                <a href="#yield" className="mobile-nav-btn" onClick={() => setIsMenuOpen(false)}>
+                  <TrendingUp size={22} />
                   <span>{lang === 'RU' ? 'Доходность' : 'Yield'}</span>
                 </a>
-                <a href="#defi" onClick={() => setIsMenuOpen(false)}>
-                  <Zap size={20} />
-                  <span>DEFI</span>
+                <a href="#defi" className="mobile-nav-btn" onClick={() => setIsMenuOpen(false)}>
+                  <Zap size={22} />
+                  <span>DEFI HUB</span>
                 </a>
-                <a href="#nft" onClick={() => setIsMenuOpen(false)}>
-                  <Wallet size={20} />
+                <a href="#nft" className="mobile-nav-btn" onClick={() => setIsMenuOpen(false)}>
+                  <Wallet size={22} />
                   <span>{t.nav.nft}</span>
                 </a>
-                <a href="#tokenomics" onClick={() => setIsMenuOpen(false)}>
-                  <BarChart3 size={20} />
+                <a href="#tokenomics" className="mobile-nav-btn" onClick={() => setIsMenuOpen(false)}>
+                  <BarChart3 size={22} />
                   <span>{t.nav.tokenomics}</span>
                 </a>
-                <a href="#roadmap" onClick={() => setIsMenuOpen(false)}>
-                  <Mail size={20} />
+                <a href="#roadmap" className="mobile-nav-btn" onClick={() => setIsMenuOpen(false)}>
+                  <Mail size={22} />
                   <span>{t.nav.roadmap}</span>
                 </a>
 
-                <div className="lang-switch modal-lang-switch">
-                  <button className={`lang-btn ${lang === 'RU' ? 'active' : ''}`} onClick={() => setLang('RU')}>RU</button>
-                  <button className={`lang-btn ${lang === 'EN' ? 'active' : ''}`} onClick={() => setLang('EN')}>EN</button>
-                </div>
+                <button 
+                  className="mobile-nav-btn menu-promo-btn"
+                  onClick={() => { setIsMenuOpen(false); open(); }}
+                >
+                  <Zap size={24} className="promo-zap-icon" />
+                  <span className="promo-btn-text">
+                    {lang === 'RU' ? 'ПОДКЛЮЧИ КОШЕЛЕК И ПОЛУЧИ 60 GBU' : 'CONNECT WALLET & GET 60 GBU'}
+                  </span>
+                </button>
+              </div>
+
+              <div className="lang-switch modal-lang-switch">
+                <button className={`lang-btn ${lang === 'RU' ? 'active' : ''}`} onClick={() => setLang('RU')}>RU</button>
+                <button className={`lang-btn ${lang === 'EN' ? 'active' : ''}`} onClick={() => setLang('EN')}>EN</button>
               </div>
             </div>
           </motion.div>
