@@ -53,7 +53,13 @@ export const translations = {
                 { name: 'Команда и Разработка', percent: '15%', amount: '145,350,000' },
                 { name: 'Маркетинг и Партнеры', percent: '15%', amount: '145,350,000' },
                 { name: 'Программа лояльности', percent: '15%', amount: '145,350,000' }
-            ]
+            ],
+            stats: {
+                liquidity: "Ликвидность",
+                liquidityVal: "Заблокировано",
+                burned: "Сожжено",
+                holders: "Холдеры"
+            }
         },
         loyalty: {
             title: "Уровни лояльности",
@@ -109,6 +115,10 @@ export const translations = {
             liquidityTitle: "Добавить Ликвидность",
             liquidityDesc: "Станьте поставщиком ликвидности и получайте часть комиссий от каждой сделки.",
             chartTitle: "График GBU/AVAX",
+            marketHub: "Market Hub",
+            transparencyTitle: "Прозрачность",
+            transparencyDesc: "Контракт GBU прошел проверку. Все транзакции открыты для аудита в Snowtrace.",
+            snowtrace: "Snowtrace (Explorer)",
             buyAnalytics: "DexScreener (Аналитика)",
             dexHelp: "Если GBU не отображается на бирже: 1. Скопируйте адрес контракта из подвала сайта. 2. Вставьте его в поиск токенов на LFJ. 3. Нажмите 'Import'.",
             stats: {
@@ -116,6 +126,7 @@ export const translations = {
                 liquidity: "Ликвидность",
                 marketcap: "Капитализация"
             },
+            connectWallet: "Подключить кошелек",
             sale: {
                 title: "ПРЯМАЯ ПОКУПКА / ПОПОЛНЕНИЕ",
                 desc: "Официальный смарт-контракт для покупки GBU напрямую за AVAX.",
@@ -154,62 +165,6 @@ export const translations = {
         whitepaperModal: {
             title: "WHITEPAPER: Granite Bear Utility (GBU)",
             close: "Закрыть",
-            content: `
-        <p><strong>Версия:</strong> 1.0<br/><strong>Сеть:</strong> Avalanche (C-Chain) | <strong>Сектор:</strong> RWA / DeFi / Утилитарные программы лояльности</p>
-        
-        <h3>1. Введение (Abstract)</h3>
-        <p>Современный криптовалютный рынок перенасыщен спекулятивными активами, не имеющими фундаментальной ценности. В то же время реальный сектор экономики (в частности, добыча и обработка природного камня) сталкивается с инфляционными издержками, где цены на материалы растут на 6–9% ежегодно.</p>
-        <p>Granite Bear Utility (GBU) решает обе проблемы, создавая мост между Web3-технологиями и реальным производством. Проект представляет собой децентрализованную утилитарную экосистему на блокчейне Avalanche, где токен GBU выступает цифровым ключом к получению скидок и фиксации цен на премиальные гранитные изделия. Покупая гранит за фиатные средства, клиенты используют GBU для активации скидки, что приводит к безвозвратному сжиганию токенов и формированию математически обоснованного дефицита.</p>
-
-        <h3>2. Анализ рынка и Проблема</h3>
-        <p><strong>Проблема реального сектора:</strong> Строительные компании и B2B-заказчики страдают от волатильности цен на стройматериалы. Традиционные контракты редко позволяют зафиксировать цену на долгий срок без огромных предоплат.</p>
-        <p><strong>Проблема крипторынка:</strong> Инвесторы ищут проекты сектора RWA (Real World Assets), но большинство из них сталкиваются с юридическими барьерами, пытаясь напрямую продавать товары за токены, что нарушает законы о ЦФА и платежных средствах.</p>
-        <p><strong>Решение Granite Bear Utility:</strong> Мы не продаем гранит за криптовалюту. Товар покупается за фиат (рубли, доллары). Токен GBU работает исключительно как криптографический купон программы лояльности.</p>
-
-        <h3>3. Механика экосистемы</h3>
-        <p>Экосистема базируется на Web3-дашборде, который синхронизируется с CRM-системой производства.</p>
-        <p><strong>Сценарий использования:</strong></p>
-        <ol>
-          <li>Заказчик хочет приобрести партию гранита (брусчатка, бордюры, плиты).</li>
-          <li>Для получения скидки заказчик приобретает GBU на децентрализованной бирже (DEX).</li>
-          <li>Через Web3-дашборд заказчик отправляет токены на смарт-контракт.</li>
-          <li>Оракул (Chainlink) фиксирует курс, смарт-контракт верифицирует долларовый эквивалент и навсегда сжигает токены.</li>
-          <li>Заказчик получает фиатную скидку до 20% и фиксацию прайса.</li>
-        </ol>
-
-        <h3>4. Дефляционная модель и Математика сжигания</h3>
-        <p>Для защиты от волатильности используются фиксированные фиатные пороги сжигания:</p>
-        <ul>
-          <li><strong>Базовый ($100):</strong> Скидка 5%, фиксация цены на 1 мес.</li>
-          <li><strong>Продвинутый ($300):</strong> Скидка 10%, фиксация цены на 3 мес.</li>
-          <li><strong>Pro B2B ($600):</strong> Скидка 15%, приоритет в логистике.</li>
-          <li><strong>VIP NFT ($900+):</strong> Скидка 20%, персональный менеджер.</li>
-        </ul>
-
-        <h3>5. Механика подтверждения (Proof of Burn)</h3>
-        <p>После транзакции сжигания Web3-дашборд генерирует уникальный <strong>Верификационный Код</strong>. Этот код связывает транзакцию в блокчейне с конкретным заказом.</p>
-        <p><strong>Пример подтверждения для продавца:</strong></p>
-        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border: 1px dashed #D4AF37; margin: 10px 0;">
-          <p style="margin: 0; font-family: monospace;">
-            ACCOUNT: 0x71C...49FD (Ваш кошелек)<br/>
-            STATUS: Burned 12,400 GBU ($600 Equiv.)<br/>
-            <strong>DISCOUNT CODE: GBU-X5R2-49FD</strong>
-          </p>
-        </div>
-        <p>Предъявите этот код при оформлении заказа за фиат, и менеджер верифицирует вашу скидку в блокчейне.</p>
-
-        <h3>6. Токеномика</h3>
-        <p>Управление эмиссией построено на принципах защиты ликвидности. Возможен только процесс сжигания (Burn). Максимальная эмиссия: 969,000,000 GBU.</p>
-
-        <h3>6. Granite Club: NFT Интеграция</h3>
-        <p>В экосистему интегрирована строго лимитированная NFT-коллекция (до 500 единиц) "Granite Bear Utility Bears". Эта статусная коллекция предоставляет пожизненный доступ к VIP-скидкам, DeFi буст (+10% APY) и физическую статуэтку медведя из гранита.</p>
-
-        <h3>7. Технологическая архитектура</h3>
-        <p>Выбор сети Avalanche обусловлен ее архитектурными преимуществами: Скорость и масштабируемость (4500+ TPS), Мгновенная финальность (&lt; 2 сек) и Низкие комиссии (Gas ~$0.01).</p>
-        
-        <h3>8. Юридический отказ от ответственности (Disclaimer)</h3>
-        <p><small>Токен GBU является исключительно утилитарным криптографическим токеном (Utility Token), предназначенным для взаимодействия с экосистемой Granite Bear Utility. GBU не является ценной бумагой, инвестиционным контрактом, долей в компании или платежным средством. Участие в проекте означает полное принятие пользователем всех возможных финансовых и технических рисков.</small></p>
-      `
         }
     },
     EN: {
@@ -266,7 +221,13 @@ export const translations = {
                 { name: 'Team & Development', percent: '15%', amount: '145,350,000' },
                 { name: 'Marketing & Partners', percent: '15%', amount: '145,350,000' },
                 { name: 'Loyalty Program', percent: '15%', amount: '145,350,000' }
-            ]
+            ],
+            stats: {
+                liquidity: "Liquidity",
+                liquidityVal: "Locked",
+                burned: "Burned",
+                holders: "Holders"
+            }
         },
         loyalty: {
             title: "Loyalty Tiers",
@@ -322,6 +283,10 @@ export const translations = {
             liquidityTitle: "Add Liquidity",
             liquidityDesc: "Become a liquidity provider and earn a share of the fees from every trade.",
             chartTitle: "GBU/AVAX Chart",
+            marketHub: "Market Hub",
+            transparencyTitle: "Transparency",
+            transparencyDesc: "GBU contract is verified. All transactions are open for audit on Snowtrace.",
+            snowtrace: "Snowtrace (Explorer)",
             buyAnalytics: "DexScreener (Analytics)",
             dexHelp: "If GBU is not visible: 1. Copy contract address from the footer. 2. Paste it into the search on LFJ. 3. Click 'Import'.",
             stats: {
@@ -329,6 +294,7 @@ export const translations = {
                 liquidity: "Liquidity",
                 marketcap: "Market Cap"
             },
+            connectWallet: "Connect Wallet",
             sale: {
                 title: "PRE-SALE / GBU REFILL",
                 desc: "Official smart-contract for direct GBU purchase using AVAX.",
@@ -367,59 +333,6 @@ export const translations = {
         whitepaperModal: {
             title: "WHITEPAPER: Granite Bear Utility (GBU)",
             close: "Close",
-            content: `
-        <p><strong>Version:</strong> 1.0<br/><strong>Network:</strong> Avalanche (C-Chain) | <strong>Sector:</strong> RWA / DeFi / Utility Loyalty Programs</p>
-        
-        <h3>1. Abstract</h3>
-        <p>The modern cryptocurrency market is oversaturated with speculative assets lacking fundamental value. At the same time, the real economy sector (particularly the extraction and processing of natural stone) faces inflationary costs, where material prices rise by 6–9% annually.</p>
-        <p>Granite Bear (GBU) solves both problems by creating a bridge between Web3 technologies and real production. The project is a decentralized utility ecosystem on the Avalanche blockchain, where the GBU token serves as a digital key to discounts and price locking on premium granite products.</p>
-
-        <h3>2. Market Analysis and Problem</h3>
-        <p><strong>Problem:</strong> Construction companies and B2B clients suffer from building material price volatility. Most RWA projects face high regulatory barriers trying to sell goods for crypto directly.</p>
-        <p><strong>Solution:</strong> We do not sell granite for crypto. Goods are paid in fiat, while the GBU token functions strictly as a cryptographic loyalty coupon to activate discounts.</p>
-
-        <h3>3. Ecosystem Mechanics</h3>
-        <p><strong>Scenario:</strong></p>
-        <ol>
-          <li>Client buys GBU on a DEX to secure a discount on a granite batch.</li>
-          <li>Through the Web3 Dashboard, they send tokens to the smart contract.</li>
-          <li>A Chainlink Oracle captures the price, the contract verifies the USD equivalent and permanently burns the tokens.</li>
-          <li>Client receives up to a 20% fiat discount and price fixation.</li>
-        </ol>
-
-        <h3>4. Deflationary Model & Burn Math</h3>
-        <p>Fixed fiat thresholds are used to protect users from market volatility:</p>
-        <ul>
-          <li><strong>Basic ($100):</strong> 5% discount, 1-mo price lock.</li>
-          <li><strong>Advanced ($300):</strong> 10% discount, 3-mo price lock.</li>
-          <li><strong>Pro B2B ($600):</strong> 15% discount, priority logistics.</li>
-          <li><strong>VIP NFT ($900+):</strong> 20% discount, personal manager.</li>
-        </ul>
-
-        <h3>5. Verification Mechanism (Proof of Burn)</h3>
-        <p>After the burn transaction, the Web3 Dashboard generates a unique <strong>Verification Code</strong>. This code links the blockchain transaction to a specific order.</p>
-        <p><strong>Example confirmation for the seller:</strong></p>
-        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border: 1px dashed #D4AF37; margin: 10px 0;">
-          <p style="margin: 0; font-family: monospace;">
-            ACCOUNT: 0x71C...49FD (Client Wallet)<br/>
-            STATUS: Burned 12,400 GBU ($600 Equiv.)<br/>
-            <strong>DISCOUNT CODE: GBU-X5R2-49FD</strong>
-          </p>
-        </div>
-        <p>Present this code when paying for your order in fiat, and the manager will verify your discount on the blockchain.</p>
-
-        <h3>6. Tokenomics</h3>
-        <p>Emission management favors liquidity protection. Only the Burn process is possible. Hard Cap: 969,000,000 GBU.</p>
-
-        <h3>6. Granite Club: NFT Integration</h3>
-        <p>Strictly limited to 500 units, the "Granite Bear Utility Bears" NFT grants lifetime VIP discounts, a DeFi boost (+10% APY), and a physical granite bear statue.</p>
-
-        <h3>7. Architecture</h3>
-        <p>Avalanche was chosen for scalability (4500+ TPS), instant finality (&lt;2s), and low fees (~$0.01).</p>
-        
-        <h3>8. Legal Disclaimer</h3>
-        <p><small>GBU is strictly a Utility Token. It is not a security, investment contract, or legal tender. Participation signifies full acceptance of all technical and financial risks.</small></p>
-      `
         }
     }
 };
