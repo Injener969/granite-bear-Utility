@@ -770,12 +770,12 @@ function App() {
                 </p>
                 <div className="flex-col-gap-12">
                   <a 
-                    href={`https://lfj.gg/avalanche/trade?outputCurrency=${GBU_ADDRESS}`}
+                    href={`https://lfj.gg/avalanche/pool/v2/${GBU_ADDRESS}/0xB31f66AA3C1e785363F022A1c172621C29146600`}
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="btn-cyan btn-full-width-round text-decoration-none"
                   >
-                    <Users size={18} className="defi-icon-margin" /> {lang === 'RU' ? 'ХОЛДЕРЫ' : 'HOLDERS'}
+                    <Zap size={18} className="defi-icon-margin" /> {lang === 'RU' ? 'ДОБАВЬ ЛИКВИДНОСТЬ' : 'ADD LIQUIDITY'}
                   </a>
                 </div>
               </div>
@@ -796,17 +796,6 @@ function App() {
                 </div>
               </div>
 
-              {/* Stats Grid */}
-              <div className="defi-mini-stats-grid">
-                <div className="defi-transparent-card mini-stat-unit-padding">
-                  <div className="mini-stat-label-text">{t.defi.stats.volume}</div>
-                  <div className="mini-stat-value-text">${defiStats.volume24h.toLocaleString()}</div>
-                </div>
-                <div className="defi-transparent-card mini-stat-unit-padding">
-                  <div className="mini-stat-label-text">{t.defi.stats.marketcap}</div>
-                  <div className="mini-stat-value-text">${Math.floor(defiStats.priceUSD * 969000000 / 1000).toLocaleString()}k</div>
-                </div>
-              </div>
             </div>
           </div>
 
