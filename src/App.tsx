@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
-import { Wallet, CheckCircle, BarChart3, X, TrendingUp, Zap, Send, Mail, Maximize2, Minimize2, Coins, Users, ShieldCheck } from 'lucide-react';
+import { Wallet, CheckCircle, BarChart3, X, TrendingUp, Zap, Send, Mail, Maximize2, Minimize2, Coins, ShieldCheck } from 'lucide-react';
 import './index.css';
 import { BrowserProvider, Contract, formatUnits, parseEther, parseUnits } from 'ethers';
 import { createWeb3Modal, defaultConfig, useWeb3Modal, useWeb3ModalAccount, useWeb3ModalProvider } from '@web3modal/ethers/react';
@@ -131,12 +131,19 @@ function App() {
   const [verificationCode, setVerificationCode] = useState<string | null>(null);
 
   // Real-time DeFi Stats from DexScreener
+  /*
+  // Checklist from user's instruction:
+  // - [x] Fix TypeScript errors for Vercel deploy (ExternalLink, Search, Users, defiStats)
+  // - [x] Align DexScreener chart and DEFI grid layout
+  // - [x] Add language switcher to desktop and mobile header
+  // - [ ] Финальная проверка целостности всех функций Дашборда <!-- id: 33 -->
   const [defiStats, setDefiStats] = useState({
     volume24h: 42850,
     liquidityUSD: 1240000,
     priceUSD: 0.06,
     priceChange: 12.4
   });
+  */
 
   const [newAvaxRate, setNewAvaxRate] = useState<number>(166);
   const [newUsdtRate, setNewUsdtRate] = useState<number>(16);
@@ -183,12 +190,14 @@ function App() {
 
         if (data.pairs && data.pairs.length > 0) {
           const mainPair = data.pairs[0]; 
+          /* 
           setDefiStats({
             volume24h: mainPair.volume.h24 || 0,
             liquidityUSD: mainPair.liquidity.usd || 0,
             priceUSD: parseFloat(mainPair.priceUsd) || 0,
             priceChange: mainPair.priceChange.h24 || 0
           });
+          */
           setCurrentPrice(parseFloat(mainPair.priceUsd) || 0.06);
         }
       } catch {
@@ -611,6 +620,22 @@ function App() {
                 </button>
               </div>
             </div>
+
+            {/* Desktop Lang Switch */}
+            <div className="lang-switch desktop-only margin-left-8">
+              <button 
+                className={`lang-btn ${lang === 'RU' ? 'active' : ''}`} 
+                onClick={() => setLang('RU')}
+              >
+                RU
+              </button>
+              <button 
+                className={`lang-btn ${lang === 'EN' ? 'active' : ''}`} 
+                onClick={() => setLang('EN')}
+              >
+                EN
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -711,123 +736,120 @@ function App() {
           </div>
         </motion.div>
       </section>
+
       {/* DEFI HUB */}
       <section id="defi" className="section container">
-        {/* Removed motion.div animation, made it static */}
-        <div>
-          <div className="features-header-box">
-            <h2 className="margin-bottom-5">
-              <span className="tokenomics-text-gradient">{t.defi.title}</span>
-            </h2>
-            <p className="feature-desc-muted">{t.defi.subtitle}</p>
+        <div className="features-header-box">
+          <h2 className="margin-bottom-5">
+            <span className="tokenomics-text-gradient">{t.defi.title}</span>
+          </h2>
+          <p className="feature-desc-muted">{t.defi.subtitle}</p>
+        </div>
+
+        <div className="defi-grid">
+          {/* Left Column: Live Chart */}
+          <div className="defi-transparent-card defi-card-padding">
+            <div className="defi-chart-header">
+              <div className="defi-title-with-btn">
+                <h3 className="defi-title-small">GBU / AVAX LIVE</h3>
+                <div className="live-indicator">
+                  <span className="dot"></span> LIVE
+                </div>
+              </div>
+            </div>
+            <div className="chart-container-internal relative-container">
+              <button 
+                onClick={() => setIsChartFullscreen(true)} 
+                className="btn-expand-chart-abs"
+                title={lang === 'RU' ? "Развернуть график" : "Expand chart"}
+              >
+                <Maximize2 size={16} />
+              </button>
+              <iframe 
+                src={`https://dexscreener.com/avalanche/${GBU_ADDRESS}?embed=1&theme=dark&trades=0&info=0`}
+                className="chart-iframe"
+                title="GBU Chart"
+              />
+            </div>
+            <div className="margin-top-15 text-center">
+              <a 
+                href={`https://dexscreener.com/avalanche/${GBU_ADDRESS}`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="btn-social padding-8-20 text-decoration-none"
+              >
+                <BarChart3 size={14} className="margin-right-8" /> {lang === 'RU' ? 'ОТКРЫТЬ В DEXSCREENER' : 'OPEN IN DEXSCREENER'}
+              </a>
+            </div>
           </div>
 
-          <div className="defi-grid">
-            {/* Left Column: Live Chart */}
-            <div className="defi-transparent-card defi-card-padding">
-              <div className="defi-chart-header">
-                <div className="defi-title-with-btn">
-                  <h3 className="defi-title-small">GBU / AVAX LIVE</h3>
-                  <div className="live-indicator">
-                    <span className="dot"></span> LIVE
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setIsChartFullscreen(true)} 
-                  className="btn-bw btn-expand-chart"
-                  title={lang === 'RU' ? "Развернуть график" : "Expand chart"}
-                >
-                  <Maximize2 size={16} />
-                </button>
-              </div>
-              
-              <div className="chart-container-internal">
-                <iframe 
-                  src={`https://dexscreener.com/avalanche/${GBU_ADDRESS}?embed=1&theme=dark&trades=0&info=0`}
-                  className="chart-iframe"
-                  title="GBU Chart"
-                />
-              </div>
-              <div className="margin-top-15 text-center">
+          {/* Right Column: Actions & Stats */}
+          <div className="defi-actions-column">
+            {/* Market Hub */}
+            <div className="defi-transparent-card defi-sub-card-padding margin-bottom-20">
+              <h3 className="defi-sub-card-title glow-green-text">{t.defi.marketHub}</h3>
+              <p className="defi-sub-card-desc margin-bottom-15">
+                {lang === 'RU' ? 'Добавь ликвидность и получай % с комиссии' : 'Add liquidity and earn % from fees'}
+              </p>
+              <div className="flex-col-gap-12">
                 <a 
-                  href={`https://dexscreener.com/avalanche/${GBU_ADDRESS}`} 
+                  href="https://lfj.gg/avalanche/trade/0x1ce7d0bbb25008f2b6b7a1cdc0c5a9bb7edab96d"
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="btn-social padding-8-20 text-decoration-none"
+                  className="btn-cyan btn-full-width-round text-decoration-none"
                 >
-                  <BarChart3 size={14} className="margin-right-8" /> {lang === 'RU' ? 'ОТКРЫТЬ В DEXSCREENER' : 'OPEN IN DEXSCREENER'}
+                  <Zap size={18} className="defi-icon-margin" /> {lang === 'RU' ? 'ДОБАВЬ ЛИКВИДНОСТЬ' : 'ADD LIQUIDITY'}
                 </a>
               </div>
             </div>
 
-            {/* Right Column: Actions & Stats */}
-            <div className="defi-actions-column">
-              {/* Market Hub */}
-              <div className="defi-transparent-card defi-sub-card-padding margin-bottom-20">
-                <h3 className="defi-sub-card-title glow-green-text">{t.defi.marketHub}</h3>
-                <p className="defi-sub-card-desc margin-bottom-15">
-                  {lang === 'RU' ? 'Добавь ликвидность и получай % с комиссии' : 'Add liquidity and earn % from fees'}
-                </p>
-                <div className="flex-col-gap-12">
-                  <a 
-                    href={`https://lfj.gg/avalanche/pool/v2/${GBU_ADDRESS}/0xB31f66AA3C1e785363F022A1c172621C29146600`}
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="btn-cyan btn-full-width-round text-decoration-none"
-                  >
-                    <Zap size={18} className="defi-icon-margin" /> {lang === 'RU' ? 'ДОБАВЬ ЛИКВИДНОСТЬ' : 'ADD LIQUIDITY'}
-                  </a>
-                </div>
+            {/* Transparency */}
+            <div className="defi-transparent-card defi-sub-card-padding margin-bottom-20">
+              <h3 className="defi-sub-card-title-gold">{t.defi.transparencyTitle}</h3>
+              <p className="defi-sub-card-desc margin-bottom-15">{t.defi.transparencyDesc}</p>
+              <div className="flex-col-gap-12">
+                <a 
+                  href={`https://snowtrace.io/token/${GBU_ADDRESS}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="btn-purple btn-full-width-round text-decoration-none"
+                >
+                  <ShieldCheck size={18} className="defi-icon-margin" /> CONTRACT
+                </a>
               </div>
-
-              {/* Transparency */}
-              <div className="defi-transparent-card defi-sub-card-padding margin-bottom-20">
-                <h3 className="defi-sub-card-title-gold">{t.defi.transparencyTitle}</h3>
-                <p className="defi-sub-card-desc margin-bottom-15">{t.defi.transparencyDesc}</p>
-                <div className="flex-col-gap-12">
-                  <a 
-                    href={`https://snowtrace.io/token/${GBU_ADDRESS}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="btn-purple btn-full-width-round text-decoration-none"
-                  >
-                    <ShieldCheck size={18} className="defi-icon-margin" /> CONTRACT
-                  </a>
-                </div>
-              </div>
-
             </div>
           </div>
-
         </div>
       </section>
 
       {/* LOYALTY */}
-      < section id="loyalty" className="section container" >
+      <section id="loyalty" className="section container">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="loyalty-motion-container">
           <h2 className="text-center margin-bottom-40">{t.loyalty.title}</h2>
 
           <div className="table-wrapper compact-table margin-bottom-40">
-            <table>
-              <thead>
-                <tr>
-                  <th>{t.loyalty.tableTitle[0]}</th>
-                  <th>{t.loyalty.tableTitle[1]}</th>
-                  <th>{t.loyalty.tableTitle[2]}</th>
-                  <th>{t.loyalty.tableTitle[3]}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {t.loyalty.levels.map((level, i) => (
-                  <tr key={i} className={i === 3 ? "gold-background" : ""}>
-                    <td className={i === 3 ? "gold-text" : ""}>{level.name}</td>
-                    <td>{level.burn}</td>
-                    <td>{level.discount}</td>
-                    <td>{level.fix}</td>
+            <div className="table-responsive-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>{t.loyalty.tableTitle[0]}</th>
+                    <th>{t.loyalty.tableTitle[1]}</th>
+                    <th>{t.loyalty.tableTitle[2]}</th>
+                    <th>{t.loyalty.tableTitle[3]}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {t.loyalty.levels.map((level, i) => (
+                    <tr key={i} className={i === 3 ? "gold-background" : ""}>
+                      <td className={i === 3 ? "gold-text" : ""}>{level.name}</td>
+                      <td>{level.burn}</td>
+                      <td>{level.discount}</td>
+                      <td>{level.fix}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div className="loyalty-dashboard loyalty-dashboard-padding margin-bottom-30">
@@ -928,16 +950,12 @@ function App() {
             <p className="nft-subtitle">{t.nft.subtitle}</p>
           </div>
 
+
           <div className="nft-centered-layout">
             
-            <div className="nft-title-block">
-              <h2 className="nft-club-title">CLUB GBU NFT</h2>
-              <p className="nft-club-subtitle">Владение NFT — ваша прямая привилегия в экосистеме GBU.</p>
-            </div>
-
             {/* CARDS CONTAINER */}
             <div className="glass-card nft-neon-glow nft-cards-container">
-              <div className="nft-cards-row nft-scroll-container">
+              <div className="nft-cards-row">
                 <div className="nft-cards-grid-internal">
                 
                   {/* SILVER CARD */}
@@ -1051,24 +1069,26 @@ function App() {
             </div>
 
             <div className="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>{t.tokenomics.tableTitle[0]}</th>
-                    <th>{t.tokenomics.tableTitle[1]}</th>
-                    <th>{t.tokenomics.tableTitle[2]}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {t.tokenomics.items.map((item, i) => (
-                    <tr key={i}>
-                      <td>{item.name}</td>
-                      <td>{item.percent}</td>
-                      <td>{item.amount}</td>
+              <div className="table-responsive-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>{t.tokenomics.tableTitle[0]}</th>
+                      <th>{t.tokenomics.tableTitle[1]}</th>
+                      <th>{t.tokenomics.tableTitle[2]}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {t.tokenomics.items.map((item, i) => (
+                      <tr key={i}>
+                        <td>{item.name}</td>
+                        <td>{item.percent}</td>
+                        <td>{item.amount}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             <div className="tokenomics-stats-grid">
@@ -1104,6 +1124,8 @@ function App() {
           </div>
         </motion.div>
       </section>
+
+
 
       {/* FOOTER */}
       <footer className="footer polished-granite">
@@ -1595,10 +1617,14 @@ function App() {
                 </a>
               </div>
 
-              <div className="lang-switch modal-lang-switch">
-                <button className={`lang-btn ${lang === 'RU' ? 'active' : ''}`} onClick={() => setLang('RU')}>RU</button>
-                <button className={`lang-btn ${lang === 'EN' ? 'active' : ''}`} onClick={() => setLang('EN')}>EN</button>
+              {/* Mobile Lang Switch moved outside the grid for better positioning */}
+              <div className="mobile-menu-lang-switch">
+                <div className="lang-switch">
+                  <button className={`lang-btn ${lang === 'RU' ? 'active' : ''}`} onClick={() => setLang('RU')}>RU</button>
+                  <button className={`lang-btn ${lang === 'EN' ? 'active' : ''}`} onClick={() => setLang('EN')}>EN</button>
+                </div>
               </div>
+
             </div>
           </motion.div>
         )}
