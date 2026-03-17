@@ -137,12 +137,6 @@ function App() {
   // - [x] Align DexScreener chart and DEFI grid layout
   // - [x] Add language switcher to desktop and mobile header
   // - [ ] Финальная проверка целостности всех функций Дашборда <!-- id: 33 -->
-  const [defiStats, setDefiStats] = useState({
-    volume24h: 42850,
-    liquidityUSD: 1240000,
-    priceUSD: 0.06,
-    priceChange: 12.4
-  });
   */
 
   const [newAvaxRate, setNewAvaxRate] = useState<number>(166);
@@ -1091,20 +1085,6 @@ function App() {
               </div>
             </div>
 
-            <div className="tokenomics-stats-grid">
-              <div className="glass-card tokenomics-info-card">
-                <div className="mini-stat-label-text">{t.tokenomics.stats.liquidity}</div>
-                <div className="stat-value-sm stat-value-red">{t.tokenomics.stats.liquidityVal}</div>
-              </div>
-              <div className="glass-card tokenomics-info-card">
-                <div className="mini-stat-label-text">{t.tokenomics.stats.burned}</div>
-                <div className="stat-value-sm stat-value-red">{totalBurned.toLocaleString()}</div>
-              </div>
-              <div className="glass-card tokenomics-info-card">
-                <div className="mini-stat-label-text">{t.tokenomics.stats.holders}</div>
-                <div className="stat-value-sm">1,200+</div>
-              </div>
-            </div>
           </div>
         </motion.div>
       </section>
@@ -1234,7 +1214,12 @@ function App() {
 
       <AnimatePresence>
         {isDrawerOpen && (
-          <>
+          <motion.div
+            key="drawer-wrapper"
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+          >
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -1558,7 +1543,7 @@ function App() {
                 </div>
               )}
             </motion.div>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
 
