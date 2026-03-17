@@ -204,9 +204,37 @@ function App() {
     return () => clearInterval(statsInterval);
   }, []);
 
+  const updateAdminStats = useCallback(async (provider: BrowserProvider, gbuContract: Contract) => {
+    try {
+      const saleContract = new Contract(GBU_SALE_ADDRESS, GBU_SALE_ABI, provider);
+      const contractOwner = await saleContract.owner().catch(() => "0x6c18c4ba7e3b4574dd70e2c2a81b0a18321d039f");
+      const isOwner = address?.toLowerCase() === contractOwner.toLowerCase();
+
+      if (isOwner) {
+        const [avaxBal, gbuReserves, usdtBalRaw] = await Promise.all([
+          provider.getBalance(GBU_SALE_ADDRESS).catch(() => 0n),
+          gbuContract.balanceOf(GBU_SALE_ADDRESS).catch(() => 0n),
+          new Contract(USDT_ADDRESS, ["function balanceOf(address) view returns (uint256)"], provider).balanceOf(GBU_SALE_ADDRESS).catch(() => 0n)
+        ]);
+
+        setSaleStats({
+          avaxBalance: parseFloat(formatUnits(avaxBal, 18)).toFixed(4),
+          usdtBalance: parseFloat(formatUnits(usdtBalRaw, 6)).toFixed(2),
+          gbuStored: parseFloat(formatUnits(gbuReserves, 18)).toLocaleString(),
+          isOwner: true
+        });
+      } else {
+        setSaleStats(prev => ({ ...prev, isOwner: false }));
+      }
+    } catch (err) {
+      console.error("Admin stats sync error:", err);
+    }
+  }, [address]);
+
   const updateBalance = useCallback(async () => {
     if (!isConnected || !walletProvider || !address) {
       setBalance("0");
+      setSaleStats(prev => ({ ...prev, isOwner: false }));
       return;
     }
     try {
@@ -214,66 +242,16 @@ function App() {
       const gbuContract = new Contract(GBU_ADDRESS, GBU_ABI, provider);
       const bal = await gbuContract.balanceOf(address);
       setBalance(formatUnits(bal, 18));
-
-
-      // Check if owner and fetch stats
-      let isOwner = false;
-      try {
-        const saleContract = new Contract(GBU_SALE_ADDRESS, GBU_SALE_ABI, provider);
-        const contractOwner = await saleContract.owner();
-        isOwner = address.toLowerCase() === contractOwner.toLowerCase();
-      } catch {
-        // Fallback: check known deployer address
-        isOwner = address.toLowerCase() === "0x6c18c4ba7e3b4574dd70e2c2a81b0a18321d039f";
-        console.warn("owner() call failed, using fallback check");
-      }
-
-      if (isOwner) {
-        try {
-          // Fetch balances independently
-          let avaxBalStr = "0.0000";
-          try {
-            const avaxBal = await provider.getBalance(GBU_SALE_ADDRESS);
-            avaxBalStr = parseFloat(formatUnits(avaxBal, 18)).toFixed(4);
-          } catch (e) { console.error("Admin AVAX fetch error:", e); }
-
-          let gbuStoredStr = "0";
-          try {
-            const gbuReserves = await gbuContract.balanceOf(GBU_SALE_ADDRESS);
-            gbuStoredStr = parseFloat(formatUnits(gbuReserves, 18)).toLocaleString();
-          } catch (e) { console.error("Admin GBU fetch error:", e); }
-
-          let usdtBalStr = "0.00";
-          try {
-            const usdtContract = new Contract(USDT_ADDRESS, ["function balanceOf(address) view returns (uint256)"], provider);
-            const usdtBal = await usdtContract.balanceOf(GBU_SALE_ADDRESS);
-            usdtBalStr = parseFloat(formatUnits(usdtBal, 6)).toFixed(2);
-          } catch (usdtErr) {
-            console.warn("USDT balance read failed:", usdtErr);
-            usdtBalStr = "0.00";
-          }
-
-          console.log("Admin stats synced:", { avax: avaxBalStr, usdt: usdtBalStr, gbu: gbuStoredStr });
-
-          setSaleStats({
-            avaxBalance: avaxBalStr,
-            usdtBalance: usdtBalStr,
-            gbuStored: gbuStoredStr,
-            isOwner: true
-          });
-        } catch (e) {
-          console.error("Admin panel global stats error:", e);
-          setSaleStats(prev => ({ ...prev, isOwner: true }));
-        }
-      }
+      
+      await updateAdminStats(provider, gbuContract);
     } catch (err) {
       console.error("Error fetching balance:", err);
     }
-  }, [isConnected, walletProvider, address]);
+  }, [isConnected, walletProvider, address, updateAdminStats]);
 
   useEffect(() => {
+    updateBalance();
     if (isConnected) {
-      updateBalance();
       const interval = setInterval(updateBalance, 30000);
       return () => clearInterval(interval);
     }
@@ -452,19 +430,6 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    if (isConnected) {
-      updateBalance();
-    } else {
-      setBalance("0");
-      setSaleStats({
-        avaxBalance: "0",
-        usdtBalance: "0",
-        gbuStored: "0",
-        isOwner: false
-      });
-    }
-  }, [isConnected, address, walletProvider, updateBalance]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -750,15 +715,15 @@ function App() {
                   <span className="dot"></span> LIVE
                 </div>
               </div>
-            </div>
-            <div className="chart-container-internal relative-container">
               <button 
                 onClick={() => setIsChartFullscreen(true)} 
-                className="btn-expand-chart-abs"
+                className="btn-expand-chart"
                 title={lang === 'RU' ? "Развернуть график" : "Expand chart"}
               >
                 <Maximize2 size={16} />
               </button>
+            </div>
+            <div className="chart-container-internal relative-container">
               <iframe 
                 src={`https://dexscreener.com/avalanche/${GBU_ADDRESS}?embed=1&theme=dark&trades=0&info=0`}
                 className="chart-iframe"
@@ -787,7 +752,7 @@ function App() {
               </p>
               <div className="flex-col-gap-12">
                 <a 
-                  href="https://lfj.gg/avalanche/trade/0x1ce7d0bbb25008f2b6b7a1cdc0c5a9bb7edab96d"
+                  href="https://lfj.gg/avalanche/pool/v1/0x1ce7d0bbb25008f2b6b7a1cdc0c5a9bb7edab96d/AVAX"
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="btn-cyan btn-full-width-round text-decoration-none"

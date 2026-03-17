@@ -104,27 +104,6 @@ h6 {
   box-shadow: 0 12px 25px -10px rgba(0, 112, 255, 0.6);
 }
 
-.btn-social {
-  padding: 10px 24px;
-  border-radius: 50px !important;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-heading);
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--text-main);
-  text-decoration: none;
-  transition: all 0.2s ease;
-}
-
-.btn-social:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: translateY(-2px);
-}
 
 .container {
   max-width: 1200px;
@@ -402,12 +381,6 @@ h6 {
   color: var(--accent-red);
 }
 
-.header-right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-}
 
 .balance-wrapper {
   display: flex;
@@ -597,17 +570,11 @@ h6 {
   color: white;
   width: 40px;
   height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding: 10px;
   border-radius: 12px;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -1039,49 +1006,6 @@ h6 {
   justify-content: space-between;
 }
 
-/* Footer */
-footer {
-  padding: 20px 0 10px;
-  /* Slimmer footer */
-  background: rgba(5, 5, 10, 0.98);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  position: relative;
-  z-index: 10;
-}
-
-.footer-links {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-bottom: 15px;
-  flex-wrap: wrap;
-  /* Added to prevent hiding on mobile */
-}
-
-.smart-contract {
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  margin: 5px 0;
-  padding: 4px 12px;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  font-size: 0.7rem;
-  width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.contract-address {
-  font-family: monospace;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 1px 4px;
-  border-radius: 4px;
-  letter-spacing: 0.5px;
-}
 
 /* Responsive */
 @media (max-width: 992px) {
@@ -1989,7 +1913,6 @@ footer {
 .defi-title-with-btn { display: flex; align-items: center; gap: 15px; }
 .defi-title-small { margin: 0; font-size: 1.2rem; }
 .btn-expand-chart { padding: 6px; border-radius: 50%; width: 32px; height: 32px; min-width: auto; border: 1px solid var(--accent-red); color: var(--accent-red); }
-.chart-container-internal { height: 250px; background: rgba(5, 5, 16, 0.4); border-radius: 12px; overflow: hidden; border: 1px solid var(--glass-border); }
 .defi-sub-card-title { font-size: 1rem; color: var(--accent-red); margin-top: 0; }
 .defi-sub-card-title-gold { font-size: 1rem; color: var(--accent-gold); margin-top: 0; }
 .defi-sub-card-desc { font-size: 0.85rem; color: var(--text-muted); margin: 10px 0 20px; }
@@ -2032,14 +1955,63 @@ footer {
 .roadmap-phase-title-style { margin-bottom: 50px; }
 
 /* Footer */
-.footer-links-row { display: flex; justify-content: center; gap: 25px; margin-bottom: 25px; align-items: center; }
-.footer-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 5px; }
-.footer-legals { color: var(--text-muted); text-decoration: none; font-size: 0.8rem; font-weight: 600; }
+.footer {
+  position: relative;
+  z-index: 10;
+  padding: 60px 0 30px;
+}
+
+.polished-granite {
+  background: rgba(10, 10, 15, 0.9);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.footer-links { display: flex; justify-content: center; gap: 25px; margin-bottom: 25px; align-items: center; }
+.footer-divider-line { width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 5px; }
+.footer-legal-link { color: var(--text-muted); text-decoration: none; font-size: 0.8rem; font-weight: 600; transition: color 0.3s ease; }
+.footer-legal-link:hover { color: var(--accent-red); }
 .contract-clickable { cursor: pointer; transition: 0.2s; }
 .contract-label-text { color: var(--text-muted); }
 .copy-btn-flex { display: flex; gap: 8px; align-items: center; }
-.copyright-text { color: var(--text-muted); font-size: 0.75rem; margin-top: 20px; }
-.disclaimer-text { margin-top: 30px; font-size: 0.75rem; opacity: 0.7; }
+.smart-contract {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 15px 25px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 20px;
+  transition: all 0.3s ease;
+}
+
+.contract-box-clickable { cursor: pointer; }
+.contract-box-clickable:hover { 
+  background: rgba(255, 255, 255, 0.06); 
+  border-color: rgba(255, 59, 63, 0.2);
+  transform: translateY(-2px);
+}
+
+.contract-address {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  color: var(--accent-red);
+  letter-spacing: 1px;
+}
+
+.footer-copy-btn-flex { margin-top: 5px; }
+.copy-btn-text-style { 
+  font-weight: 800; 
+  letter-spacing: 1px; 
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+.footer-copyright-text { color: var(--text-muted); font-size: 0.75rem; margin-top: 25px; opacity: 0.6; }
+.disclaimer-footer-style { margin-top: 30px; font-size: 0.7rem; opacity: 0.5; color: var(--text-muted); line-height: 1.6; max-width: 900px; margin-left: auto; margin-right: auto; }
 
 /* Modals & Drawers */
 .modal-footer-padding { padding: 20px; text-align: right; border-top: 1px solid rgba(255,255,255,0.1); }
@@ -2414,14 +2386,14 @@ footer {
 .chart-container-internal {
   position: relative;
   width: 100%;
-  height: 500px;
+  height: 400px;
   border-radius: 15px;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
   margin-top: 15px;
   box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
-  z-index: 1;
+  /* z-index removed to avoid overlap issues with footer/modals */
 }
 
 .relative-container { position: relative; }
@@ -2509,7 +2481,7 @@ footer {
     grid-template-columns: 1fr;
   }
   .chart-container-internal {
-    height: 350px;
+    height: 300px;
     border-radius: 12px;
     margin-left: 0;
     margin-right: 0;
