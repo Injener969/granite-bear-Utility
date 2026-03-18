@@ -565,14 +565,6 @@ function App() {
 
           {/* RIGHT: WALLET & BUY */}
           <div className="header-right header-right-flex">
-            {!isConnected && (
-              <button 
-                className="desktop-only btn-gold header-buy-btn"
-                onClick={() => setIsDrawerOpen(true)}
-              >
-                <Zap size={16} /> {lang === 'RU' ? 'КУПИТЬ GBU' : 'BUY GBU'}
-              </button>
-            )}
             
             {isConnected && address && (
               <button
