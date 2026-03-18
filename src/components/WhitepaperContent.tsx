@@ -37,8 +37,8 @@ const WhitepaperContent: React.FC<WhitepaperContentProps> = ({ lang }) => {
 
         <h3>5. Механика подтверждения (Proof of Burn)</h3>
         <p>После транзакции сжигания Web3-дашборд генерирует уникальный <strong>Верификационный Код</strong>. Этот код связывает транзакцию в блокчейне с конкретным заказом.</p>
-        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '8px', border: '1px dashed #D4AF37', margin: '10px 0' }}>
-          <p style={{ margin: 0, fontFamily: 'monospace' }}>
+        <div className="wp-code-block">
+          <p className="wp-code-text">
             ACCOUNT: 0x71C...49FD (Ваш кошелек)<br/>
             STATUS: Burned 12,400 GBU ($600 Equiv.)<br/>
             <strong>DISCOUNT CODE: GBU-X5R2-49FD</strong>
@@ -86,8 +86,8 @@ const WhitepaperContent: React.FC<WhitepaperContentProps> = ({ lang }) => {
 
       <h3>5. Verification Mechanism (Proof of Burn)</h3>
       <p>The Web3 Dashboard generates a unique <strong>Verification Code</strong> linking the blockchain transaction to a specific order.</p>
-      <div style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '8px', border: '1px dashed #D4AF37', margin: '10px 0' }}>
-        <p style={{ margin: 0, fontFamily: 'monospace' }}>
+      <div className="wp-code-block">
+        <p className="wp-code-text">
           ACCOUNT: 0x71C...49FD (Client Wallet)<br/>
           STATUS: Burned 12,400 GBU ($600 Equiv.)<br/>
           <strong>DISCOUNT CODE: GBU-X5R2-49FD</strong>

@@ -621,7 +621,10 @@ function App() {
           <motion.p initial="hidden" animate="visible" variants={fadeUp} transition={{ delay: 0.2 }}>
             {t.hero.subtitle}
           </motion.p>
-          <motion.div className="hero-buttons" initial="hidden" animate="visible" variants={fadeUp} transition={{ delay: 0.4 }}>
+          <motion.div className="flex-justify-center-margin-30" initial="hidden" animate="visible" variants={fadeUp} transition={{ delay: 0.4 }}>
+            <button className="white-hero-wp-btn" onClick={() => setIsModalOpen(true)}>
+              <FileText size={20} className="margin-right-10" /> {t.hero.wpBtn}
+            </button>
           </motion.div>
           <motion.div className="hero-stats hero-stats-flex" initial="hidden" animate="visible" variants={fadeUp} transition={{ delay: 0.6 }}>
             <div className="stat-item glass-card stat-item-padding">
