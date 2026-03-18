@@ -1,3 +1,4 @@
+/* cSpell:disable */
 import React from 'react';
 
 interface WhitepaperContentProps {

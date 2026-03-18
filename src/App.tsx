@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
-import { Wallet, CheckCircle, BarChart3, X, TrendingUp, Zap, Send, Mail, Maximize2, Minimize2, Coins, ShieldCheck } from 'lucide-react';
+import { Wallet, CheckCircle, BarChart3, X, TrendingUp, Zap, Send, Mail, Maximize2, Minimize2, Coins, ShieldCheck, FileText } from 'lucide-react';
 import './index.css';
 import { BrowserProvider, Contract, formatUnits, parseEther, parseUnits } from 'ethers';
 import { createWeb3Modal, defaultConfig, useWeb3Modal, useWeb3ModalAccount, useWeb3ModalProvider } from '@web3modal/ethers/react';
