@@ -1,12 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
+/* cSpell:disable */
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 import { Wallet, CheckCircle, BarChart3, X, TrendingUp, Zap, Send, Mail, Maximize2, Minimize2, Coins, ShieldCheck, FileText } from 'lucide-react';
 import './index.css';
 import { BrowserProvider, Contract, formatUnits, parseEther, parseUnits } from 'ethers';
 import { createWeb3Modal, defaultConfig, useWeb3Modal, useWeb3ModalAccount, useWeb3ModalProvider } from '@web3modal/ethers/react';
 import { translations } from './translations';
 import WhitepaperContent from './components/WhitepaperContent';
+
+const TokenomicsSection = lazy(() => import('./components/TokenomicsSection'));
+const Roadmap = lazy(() => import('./components/Roadmap'));
 
 // 1. Get projectId at https://cloud.walletconnect.com (It's free)
 const projectId = 'c3c8d48e62f1e1d9bc5ff84a741e9e74'; // Replace with your real Project ID
@@ -111,6 +114,7 @@ function App() {
   const [paymentAmt, setPaymentAmt] = useState(0.5525);
   const [scrolled, setScrolled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAboutExpanded, setIsAboutExpanded] = useState(false);
   const [expandedCoin, setExpandedCoin] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isChartFullscreen, setIsChartFullscreen] = useState(false);
@@ -682,8 +686,24 @@ function App() {
             </div>
           </div>
           <div className="text-center margin-top-40">
-            <button className="btn-bw" onClick={() => setIsModalOpen(true)}>{t.hero.wpBtn}</button>
+            <button className="btn-bw" onClick={() => setIsAboutExpanded(!isAboutExpanded)}>
+              {isAboutExpanded ? (lang === 'RU' ? 'Скрыть Whitepaper' : 'Hide Whitepaper') : t.hero.wpBtn}
+            </button>
           </div>
+          <AnimatePresence>
+            {isAboutExpanded && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }} 
+                animate={{ opacity: 1, height: 'auto' }} 
+                exit={{ opacity: 0, height: 0 }}
+                className="about-inline-wp"
+              >
+                <div className="glass-card margin-top-30 text-left">
+                  <WhitepaperContent lang={lang} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       </section >
 
@@ -743,6 +763,7 @@ function App() {
                 src={`https://dexscreener.com/avalanche/${GBU_ADDRESS}?embed=1&theme=dark&trades=0&info=0`}
                 className="chart-iframe"
                 title="GBU Chart"
+                loading="lazy"
               />
             </div>
             <div className="margin-top-15 text-center">
@@ -1020,70 +1041,15 @@ function App() {
         </motion.div>
       </section>
 
-      {/* TOKENOMICS (MOVED HERE) */}
-      <section id="tokenomics" className="section container">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
-          <div className="text-center margin-bottom-50">
-            <h2 className="margin-bottom-10"><span className="tokenomics-text-gradient">{t.tokenomics.title}</span></h2>
-            <p className="text-muted-color">{t.tokenomics.subtitle}</p>
-          </div>
+      {/* TOKENOMICS (LAZY LOADED) */}
+      <Suspense fallback={<div className="text-center padding-50">Loading Tokenomics...</div>}>
+        <TokenomicsSection t={t} tokenomicsData={tokenomicsData} />
+      </Suspense>
 
-          <div className="tokenomics-main-container">
-            <div className="tokenomics-chart-box">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={tokenomicsData} cx="50%" cy="50%" innerRadius={80} outerRadius={120} paddingAngle={2} dataKey="value">
-                    {tokenomicsData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip contentStyle={{ background: '#1A1A1A', border: '1px solid #333' }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="table-wrapper">
-              <div className="table-responsive-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>{t.tokenomics.tableTitle[0]}</th>
-                      <th>{t.tokenomics.tableTitle[1]}</th>
-                      <th>{t.tokenomics.tableTitle[2]}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {t.tokenomics.items.map((item, i) => (
-                      <tr key={i}>
-                        <td>{item.name}</td>
-                        <td>{item.percent}</td>
-                        <td>{item.amount}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-          </div>
-        </motion.div>
-      </section>
-
-
-      {/* ROADMAP */}
-      <section id="roadmap" className="section container roadmap-section-max-width">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
-          <h2 className="text-center margin-bottom-50">{t.roadmap.title}</h2>
-          <div className="roadmap-timeline">
-            {t.roadmap.phases.map((phase, i) => (
-              <div key={i} className={`roadmap-item ${i === 0 ? 'active' : ''}`}>
-                <h3 className={i === 0 ? "roadmap-title-active" : "roadmap-title-normal"}>{phase.title}</h3>
-                <p className="text-muted-color">{phase.desc}</p>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      </section>
+      {/* ROADMAP (LAZY LOADED) */}
+      <Suspense fallback={<div className="text-center padding-50">Loading Roadmap...</div>}>
+        <Roadmap t={t} />
+      </Suspense>
 
 
 
@@ -1590,6 +1556,7 @@ function App() {
                   src={`https://dexscreener.com/avalanche/${GBU_ADDRESS}?embed=1&theme=dark&trades=0&info=0`}
                   className="chart-iframe-style"
                   title="GBU Chart"
+                  loading="lazy"
                 />
               </div>
             </div>
