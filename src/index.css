@@ -2658,5 +2658,13 @@ h6 {
     font-size: 1rem;
   }
 }
-. a b o u t - i n l i n e - w p   {   o v e r f l o w :   h i d d e n ;   m a r g i n - t o p :   1 5 p x ;   }   . t e x t - l e f t   {   t e x t - a l i g n :   l e f t ;   }  
- 
+
+
+.about-inline-wp {
+  overflow: hidden;
+  margin-top: 15px;
+}
+
+.text-left {
+  text-align: left;
+}
