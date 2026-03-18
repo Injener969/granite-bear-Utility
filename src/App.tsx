@@ -141,6 +141,9 @@ function App() {
 
   const [newAvaxRate, setNewAvaxRate] = useState<number>(166);
   const [newUsdtRate, setNewUsdtRate] = useState<number>(16);
+  const [chainAvaxRate, setChainAvaxRate] = useState<number>(166);
+  const [chainUsdtRate, setChainUsdtRate] = useState<number>(16);
+  const [isRatesLoaded, setIsRatesLoaded] = useState(false);
   const [replenishAmount, setReplenishAmount] = useState<number>(10000);
   const [withdrawGbuAmount, setWithdrawGbuAmount] = useState<number>(10000);
 
@@ -211,10 +214,12 @@ function App() {
       const isOwner = address?.toLowerCase() === contractOwner.toLowerCase();
 
       if (isOwner) {
-        const [avaxBal, gbuReserves, usdtBalRaw] = await Promise.all([
+        const [avaxBal, gbuReserves, usdtBalRaw, chainAvaxRate, chainUsdtRate] = await Promise.all([
           provider.getBalance(GBU_SALE_ADDRESS).catch(() => 0n),
           gbuContract.balanceOf(GBU_SALE_ADDRESS).catch(() => 0n),
-          new Contract(USDT_ADDRESS, ["function balanceOf(address) view returns (uint256)"], provider).balanceOf(GBU_SALE_ADDRESS).catch(() => 0n)
+          new Contract(USDT_ADDRESS, ["function balanceOf(address) view returns (uint256)"], provider).balanceOf(GBU_SALE_ADDRESS).catch(() => 0n),
+          saleContract.avaxRate().catch(() => 166n),
+          saleContract.usdtRate().catch(() => 16n)
         ]);
 
         setSaleStats({
@@ -223,13 +228,26 @@ function App() {
           gbuStored: parseFloat(formatUnits(gbuReserves, 18)).toLocaleString(),
           isOwner: true
         });
+
+        const cAvax = Number(chainAvaxRate);
+        const cUsdt = Number(chainUsdtRate);
+        setChainAvaxRate(cAvax);
+        setChainUsdtRate(cUsdt);
+        
+        // Initial load for inputs
+        if (!isRatesLoaded) {
+          setNewAvaxRate(cAvax);
+          setNewUsdtRate(cUsdt);
+          setIsRatesLoaded(true);
+        }
       } else {
         setSaleStats(prev => ({ ...prev, isOwner: false }));
+        setIsRatesLoaded(false); // Reset when disconnect
       }
     } catch (err) {
       console.error("Admin stats sync error:", err);
     }
-  }, [address]);
+  }, [address, isRatesLoaded]);
 
   const updateBalance = useCallback(async () => {
     if (!isConnected || !walletProvider || !address) {
@@ -265,6 +283,8 @@ function App() {
       const saleContract = new Contract(GBU_SALE_ADDRESS, GBU_SALE_ABI, signer);
       const tx = await saleContract.setRates(newAvaxRate, newUsdtRate);
       await tx.wait();
+      setChainAvaxRate(newAvaxRate);
+      setChainUsdtRate(newUsdtRate);
       alert(lang === 'RU' ? "Курсы успешно обновлены!" : "Rates updated successfully!");
     } catch (err) {
       console.error("Update rates failed:", err);
@@ -1217,24 +1237,15 @@ function App() {
                 </p>
               </div>
 
-              {/* PREMIUM ACTIONS GRID (Bonus & Import) - Only when connected */}
+              {/* PREMIUM ACTIONS GRID (Import GBU) - Only when connected */}
               {isConnected && purchaseStatus !== 'success' && (
-                <div className="premium-actions-grid">
+                <div className="single-action-container margin-bottom-20">
                   <button 
-                    className="btn-premium-action btn-bonus-gold"
-                    onClick={() => {
-                        // Bonus logic could go here or just keep the drawer open
-                    }}
-                  >
-                    <Zap size={20} />
-                    <span>{lang === 'RU' ? 'БОНУС' : 'BONUS'}</span>
-                  </button>
-                  <button 
-                    className="btn-premium-action btn-import-cyan"
+                    className="btn-premium-action btn-import-cyan btn-full-width"
                     onClick={addTokenToWallet}
                   >
                     <Coins size={20} />
-                    <span>{lang === 'RU' ? 'ИМПОРТ GBU' : 'IMPORT GBU'}</span>
+                    <span>{lang === 'RU' ? 'ИМПОРТ GBU В КОШЕЛЕК' : 'IMPORT GBU TO WALLET'}</span>
                   </button>
                 </div>
               )}
@@ -1273,24 +1284,11 @@ function App() {
               ) : (
                 /* IDLE / PROCESSING VIEW */
                 <>
-                  <div className="glass-card buy-balance-card">
-                    <div className="buy-balance-header">
-                      <span className="buy-balance-label">{lang === 'RU' ? 'Ваш баланс:' : 'Your balance:'}</span>
-                      <div className="flex-row-gap-8">
-                        <button 
-                          onClick={() => { setIsDrawerOpen(false); window.location.hash = 'loyalty'; }} 
-                          className="btn-emerald padding-4-12-font-10"
-                        >
-                          {lang === 'RU' ? 'БОНУС' : 'BONUS'}
-                        </button>
-                        <button onClick={addTokenToWallet} className="btn-cyan padding-4-12-font-10">
-                          {lang === 'RU' ? 'ИМПОРТ GBU' : 'IMPORT GBU'}
-                        </button>
-                      </div>
-                    </div>
-                    <div className="buy-balance-value">
+                  <div className="glass-card buy-balance-simple">
+                    <span className="buy-balance-label">{lang === 'RU' ? 'Ваш баланс:' : 'Your balance:'}</span>
+                    <span className="buy-balance-value-main">
                       {parseFloat(balance).toLocaleString()} GBU
-                    </div>
+                    </span>
                   </div>
 
                   <div className="margin-bottom-25">
@@ -1368,16 +1366,16 @@ function App() {
 
                     {/* Rate info */}
                     <div className="buy-details-flex">
-                      <span>{lang === 'RU' ? 'Курс GBU:' : 'GBU Rate:'}</span>
-                      <span>$0.25</span>
+                      <span>{lang === 'RU' ? 'Курс GBU (в $):' : 'GBU Price (USD):'}</span>
+                      <span className="text-bold-gold">${(1 / (newUsdtRate || 1)).toFixed(4)}</span>
                     </div>
                     <div className="buy-details-flex">
                       <span>{lang === 'RU' ? 'Сеть:' : 'Network:'}</span>
                       <span>Avalanche C-Chain</span>
                     </div>
 
-                    <div className="rate-footer-text">
-                      1 GBU ≈ {(1 / (paymentCurrency === 'AVAX' ? newAvaxRate : (newUsdtRate || 1))).toFixed(6)} {paymentCurrency}
+                    <div className="rate-footer-text buy-rate-indicator-box">
+                      1 {paymentCurrency} = <span className="text-white-bold">{paymentCurrency === 'AVAX' ? chainAvaxRate : chainUsdtRate}</span> GBU
                     </div>
                   </div>
 
@@ -1409,6 +1407,9 @@ function App() {
                   </div>
                 </>
               )}
+
+              {/* ADMIN PANEL SEPARATOR */}
+              {saleStats.isOwner && <div className="admin-section-divider" />}
 
               {/* ADMIN PANEL INSIDE DRAWER (BOTTOM) */}
               {saleStats.isOwner && (
@@ -1555,16 +1556,6 @@ function App() {
                   <span>{t.nav.roadmap}</span>
                 </a>
 
-                <a 
-                  href="#loyalty" 
-                  className="mobile-nav-btn menu-promo-btn"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <Zap size={24} className="promo-zap-icon" />
-                  <span className="promo-btn-text">
-                    {lang === 'RU' ? 'ПОДКЛЮЧИ КОШЕЛЕК И ПОЛУЧИ 60 GBU' : 'CONNECT WALLET & GET 60 GBU'}
-                  </span>
-                </a>
               </div>
 
               {/* Mobile Lang Switch moved outside the grid for better positioning */}

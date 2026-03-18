@@ -2167,18 +2167,65 @@ h6 {
 .success-cost-text { font-size: 0.9rem; color: var(--text-muted); }
 .success-actions-col { display: flex; flex-direction: column; gap: 15px; }
 
+.text-bold-gold { color: var(--accent-gold); font-weight: 800; font-size: 1.1rem; }
+.text-white-bold { color: #fff; font-weight: 800; }
+.buy-rate-indicator-box { 
+  margin-top: 15px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border-left: 2px solid var(--accent-red);
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.admin-section-divider {
+  margin: 30px 0 10px;
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, rgba(232, 65, 66, 0.2), transparent);
+  position: relative;
+}
+
+.admin-section-divider::after {
+  content: 'ADMIN PANEL';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #0a0a19;
+  padding: 0 15px;
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  color: var(--accent-red);
+  font-weight: 800;
+  opacity: 0.6;
+}
+
 /* Buy View Styles */
-.buy-balance-card { margin-bottom: 20px; padding: 15px; text-align: center; }
-.buy-balance-header { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 5px; }
-.buy-balance-label { font-size: 0.8rem; color: var(--text-muted); }
-.buy-balance-value { font-size: 1.5rem; font-weight: bold; color: var(--text-main); }
-.buy-currency-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.buy-balance-simple { 
+  margin-bottom: 20px; 
+  padding: 20px; 
+  text-align: center; 
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.buy-balance-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+.buy-balance-value-main { font-size: 1.8rem; font-weight: 800; color: #fff; text-shadow: 0 0 15px rgba(255,255,255,0.1); }
+.btn-full-width { width: 100%; justify-content: center; }
+.single-action-container { width: 100%; display: flex; justify-content: center; }
+
+.buy-currency-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; width: 100%; }
 .currency-btn-active-red { border: 2px solid #E84142 !important; background: rgba(232, 65, 66, 0.05); }
-.currency-btn-inactive { border: 2px solid rgba(255, 255, 255, 0.1); background: transparent; opacity: 0.6; }
+.currency-btn-inactive { border: 2px solid rgba(255, 255, 255, 0.1); background: transparent; opacity: 0.6; cursor: pointer; }
 .currency-btn-active-emerald { border: 2px solid #26A17B !important; background: rgba(38, 161, 123, 0.05); }
-.currency-btn-content { font-size: 1rem; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.currency-btn-content { font-size: 1rem; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; color: #fff; }
 .dot-red { width: 12px; height: 12px; border-radius: 50%; background: #E84142; }
 .dot-emerald { width: 12px; height: 12px; border-radius: 50%; background: #26A17B; }
+
 .input-group-container { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 16px; margin-bottom: 8px; }
 .input-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .input-label-text { font-size: 0.75rem; color: var(--text-muted); }
@@ -2310,18 +2357,6 @@ h6 {
   color: white;
 }
 
-.menu-buy-btn-premium {
-  width: 100%;
-  padding: 15px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  font-weight: 800;
-  font-size: 1.1rem;
-}
 
 /* Misc */
 .opensea-btn-style { min-width: 220px; padding: 15px; display: flex; align-items: center; justify-content: center; text-decoration: none; border-radius: 8px; }
