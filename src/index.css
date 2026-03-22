@@ -112,8 +112,14 @@ h6 {
 }
 
 .section {
-  padding: 70px 0;
+  padding: 80px 0;
   /* STANDARDIZED VERTICAL SPACING */
+}
+
+.section h2 {
+  margin-top: 0;
+  margin-bottom: 50px;
+  text-align: center;
 }
 
 /* Header */
@@ -768,6 +774,12 @@ h6 {
   box-shadow: 0 10px 20px -10px rgba(255, 59, 63, 0.5);
 }
 
+button.mobile-nav-btn {
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+}
+
 .mobile-nav-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   transform: translateY(-5px);
@@ -1177,7 +1189,7 @@ h6 {
 .white-hero-wp-btn {
   background: #ffffff !important;
   color: #000000 !important;
-  padding: 14px 40px;
+  padding: 10px 28px;
   border-radius: 50px;
   border: none;
   font-weight: 800;
@@ -1186,7 +1198,7 @@ h6 {
   transition: all 0.3s ease;
   box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
 }
 
 .white-hero-wp-btn:hover {
@@ -1966,10 +1978,17 @@ h6 {
 .receipt-verified-status { color: #ff3b3f; }
 
 /* NFT Section */
-.nft-header-text { text-align: center; margin-bottom: 30px; }
+.nft-header-text { text-align: center; margin-bottom: 50px; }
 .nft-main-title { color: var(--accent-gold); margin-bottom: 15px; text-shadow: 0 0 20px rgba(255,194,51,0.3); }
 .nft-subtitle { color: var(--text-muted); font-size: 1.1rem; }
-.nft-cards-row { width: 100%; max-width: 700px; padding: 25px; position: relative; margin-bottom: 30px; }
+.nft-cards-row { 
+  width: 100%; 
+  max-width: 700px; 
+  padding: 25px; 
+  position: relative; 
+  margin-bottom: 30px; 
+  overflow-x: auto; 
+}
 .nft-cards-grid-internal { display: grid; grid-template-columns: repeat(3, minmax(160px, 1fr)); gap: 15px; margin-bottom: 15px; min-width: 500px; }
 .nft-card-gold-scale { transform: scale(1.05); z-index: 2; }
 .nft-card-gold-border { border: 2px solid var(--accent-gold); }
@@ -1992,7 +2011,7 @@ h6 {
 .footer {
   position: relative;
   z-index: 10;
-  padding: 60px 0 30px;
+  padding: 25px 0 20px;
 }
 
 .polished-granite {
@@ -2013,12 +2032,12 @@ h6 {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 2px;
   background: rgba(255, 255, 255, 0.03);
-  padding: 15px 25px;
+  padding: 6px 20px;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  margin-top: 20px;
+  margin-top: 5px;
   transition: all 0.3s ease;
 }
 
@@ -2454,14 +2473,18 @@ h6 {
 
 .chart-container-internal {
   position: relative;
-  width: 100%;
-  height: 400px;
+  width: 96%;
+  max-width: 100%;
+  height: 320px;
   border-radius: 15px;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
   margin-top: 15px;
+  margin-left: auto;
+  margin-right: auto;
   box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+  box-sizing: border-box;
   /* z-index removed to avoid overlap issues with footer/modals */
 }
 

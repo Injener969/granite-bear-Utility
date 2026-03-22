@@ -24,7 +24,7 @@ const Roadmap: React.FC<RoadmapProps> = ({ t }) => {
   return (
     <section id="roadmap" className="section container roadmap-section-max-width">
       <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
-        <h2 className="text-center margin-bottom-50">{t.roadmap.title}</h2>
+        <h2>{t.roadmap.title}</h2>
         <div className="roadmap-timeline">
           {t.roadmap.phases.map((phase: RoadmapPhase, i: number) => (
             <div key={i} className={`roadmap-item ${i === 0 ? 'active' : ''}`}>

@@ -30,8 +30,8 @@ const TokenomicsSection: React.FC<TokenomicsSectionProps> = ({ t, tokenomicsData
   return (
     <section id="tokenomics" className="section container">
       <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
-        <div className="text-center margin-bottom-50">
-          <h2 className="margin-bottom-10"><span className="tokenomics-text-gradient">{t.tokenomics.title}</span></h2>
+        <div className="text-center">
+          <h2><span className="tokenomics-text-gradient">{t.tokenomics.title}</span></h2>
           <p className="text-muted-color">{t.tokenomics.subtitle}</p>
         </div>
 

@@ -1,7 +1,7 @@
 /* cSpell:disable */
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Wallet, CheckCircle, BarChart3, X, TrendingUp, Zap, Send, Mail, Maximize2, Minimize2, Coins, ShieldCheck, FileText } from 'lucide-react';
+import { Wallet, CheckCircle, BarChart3, X, TrendingUp, Zap, Send, Mail, Maximize2, Minimize2, Coins, ShieldCheck, FileText, Globe } from 'lucide-react';
 import './index.css';
 import { BrowserProvider, Contract, formatUnits, parseEther, parseUnits } from 'ethers';
 import { createWeb3Modal, defaultConfig, useWeb3Modal, useWeb3ModalAccount, useWeb3ModalProvider } from '@web3modal/ethers/react';
@@ -114,7 +114,6 @@ function App() {
   const [paymentAmt, setPaymentAmt] = useState(0.5525);
   const [scrolled, setScrolled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isAboutExpanded, setIsAboutExpanded] = useState(false);
   const [expandedCoin, setExpandedCoin] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isChartFullscreen, setIsChartFullscreen] = useState(false);
@@ -122,6 +121,7 @@ function App() {
   const [purchaseStatus, setPurchaseStatus] = useState<'idle' | 'processing' | 'success'>('idle');
   const [purchaseTxHash, setPurchaseTxHash] = useState('');
   const [purchaseDetails, setPurchaseDetails] = useState({ gbu: 0, cost: 0, currency: 'AVAX' });
+  const [loadChart, setLoadChart] = useState(false);
 
   // Web3 State using Modal hooks
   const { open } = useWeb3Modal();
@@ -135,13 +135,6 @@ function App() {
   const [verificationCode, setVerificationCode] = useState<string | null>(null);
 
   // Real-time DeFi Stats from DexScreener
-  /*
-  // Checklist from user's instruction:
-  // - [x] Fix TypeScript errors for Vercel deploy (ExternalLink, Search, Users, defiStats)
-  // - [x] Align DexScreener chart and DEFI grid layout
-  // - [x] Add language switcher to desktop and mobile header
-  // - [ ] Финальная проверка целостности всех функций Дашборда <!-- id: 33 -->
-  */
 
   const [newAvaxRate, setNewAvaxRate] = useState<number>(166);
   const [newUsdtRate, setNewUsdtRate] = useState<number>(16);
@@ -182,6 +175,12 @@ function App() {
     return () => clearInterval(interval);
   }, [chartData]);
 
+  // Lazy Delay for Heavy Chart (2 seconds after load)
+  useEffect(() => {
+    const timer = setTimeout(() => setLoadChart(true), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Real-time Fetching from DexScreener
   useEffect(() => {
     const fetchStats = async () => {
@@ -190,15 +189,7 @@ function App() {
         const data = await response.json();
 
         if (data.pairs && data.pairs.length > 0) {
-          const mainPair = data.pairs[0]; 
-          /* 
-          setDefiStats({
-            volume24h: mainPair.volume.h24 || 0,
-            liquidityUSD: mainPair.liquidity.usd || 0,
-            priceUSD: parseFloat(mainPair.priceUsd) || 0,
-            priceChange: mainPair.priceChange.h24 || 0
-          });
-          */
+          const mainPair = data.pairs[0];
           setCurrentPrice(parseFloat(mainPair.priceUsd) || 0.06);
         }
       } catch {
@@ -627,7 +618,7 @@ function App() {
           </motion.p>
           <motion.div className="flex-justify-center-margin-30" initial="hidden" animate="visible" variants={fadeUp} transition={{ delay: 0.4 }}>
             <button className="white-hero-wp-btn" onClick={() => setIsModalOpen(true)}>
-              <FileText size={20} className="margin-right-10" /> {t.hero.wpBtn}
+              <FileText size={16} className="margin-right-10" /> {t.hero.wpBtn}
             </button>
           </motion.div>
           <motion.div className="hero-stats hero-stats-flex" initial="hidden" animate="visible" variants={fadeUp} transition={{ delay: 0.6 }}>
@@ -667,7 +658,7 @@ function App() {
       {/* HOW IT WORKS */}
       < section id="about" className="section container" >
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
-          <h2 className="text-center margin-bottom-50">{t.about.title}</h2>
+          <h2 className="text-center">{t.about.title}</h2>
           <div className="feature-grid">
             <div className="glass-card feature-card-glow feature-compact glow-green">
               <div className="feature-icon-animated"><Wallet /></div>
@@ -685,25 +676,8 @@ function App() {
               <p className="text-muted-color">{t.about.card3.desc}</p>
             </div>
           </div>
-          <div className="text-center margin-top-40">
-            <button className="btn-bw" onClick={() => setIsAboutExpanded(!isAboutExpanded)}>
-              {isAboutExpanded ? (lang === 'RU' ? 'Скрыть Whitepaper' : 'Hide Whitepaper') : t.hero.wpBtn}
-            </button>
-          </div>
-          <AnimatePresence>
-            {isAboutExpanded && (
-              <motion.div 
-                initial={{ opacity: 0, height: 0 }} 
-                animate={{ opacity: 1, height: 'auto' }} 
-                exit={{ opacity: 0, height: 0 }}
-                className="about-inline-wp"
-              >
-                <div className="glass-card margin-top-30 text-left">
-                  <WhitepaperContent lang={lang} />
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Кнопка перенесена в меню (три точки) по просьбе пользователя */}
+          {/* Блок Whitepaper отсюда удален и перенесен в мобильное меню (три точки) */}
         </motion.div>
       </section >
 
@@ -734,7 +708,7 @@ function App() {
       {/* DEFI HUB */}
       <section id="defi" className="section container">
         <div className="features-header-box">
-          <h2 className="margin-bottom-5">
+          <h2>
             <span className="tokenomics-text-gradient">{t.defi.title}</span>
           </h2>
           <p className="feature-desc-muted">{t.defi.subtitle}</p>
@@ -759,12 +733,20 @@ function App() {
               </button>
             </div>
             <div className="chart-container-internal relative-container">
-              <iframe 
-                src={`https://dexscreener.com/avalanche/${GBU_ADDRESS}?embed=1&theme=dark&trades=0&info=0`}
-                className="chart-iframe"
-                title="GBU Chart"
-                loading="lazy"
-              />
+              {loadChart ? (
+                <iframe
+                  src={`https://dexscreener.com/avalanche/${GBU_ADDRESS}?embed=1&theme=dark&trades=0&info=0`}
+                  className="chart-iframe"
+                  title="GBU Chart"
+                  loading="eager"
+                />
+              ) : (
+                <div className="flex-column-center height-100-percent">
+                   <div className="live-indicator">
+                      <span className="dot pulsing"></span> {lang === 'RU' ? 'ЗАГРУЗКА ГРАФИКА...' : 'LOADING CHART...'}
+                   </div>
+                </div>
+              )}
             </div>
             <div className="margin-top-15 text-center">
               <a 
@@ -820,7 +802,7 @@ function App() {
       {/* LOYALTY */}
       <section id="loyalty" className="section container">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} className="loyalty-motion-container">
-          <h2 className="text-center margin-bottom-40">{t.loyalty.title}</h2>
+          <h2 className="text-center">{t.loyalty.title}</h2>
 
           <div className="table-wrapper compact-table margin-bottom-40">
             <div className="table-responsive-wrapper">
@@ -1016,7 +998,7 @@ function App() {
               <ul className="nft-perks-container">
                 <li className="nft-perk-item"><CheckCircle color="var(--accent-gold)" size={20} /> Пожизненная скидка до 15% на гранит</li>
                 <li className="nft-perk-item"><CheckCircle color="var(--accent-gold)" size={20} /> Ускоренный фарминг токенов GBU</li>
-                <li className="nft-perk-item"><CheckCircle color="var(--accent-gold)" size={20} /> Статус участника закрытого комьюнити</li>
+                <li className="nft-perk-item"><CheckCircle color="var(--accent-gold)" size={20} /> Статус участника открытого комьюнити</li>
               </ul>
 
               <div className="nft-actions-flex">
@@ -1504,6 +1486,13 @@ function App() {
                   <Zap size={22} />
                   <span>DEFI HUB</span>
                 </a>
+                <button 
+                  className="mobile-nav-btn" 
+                  onClick={() => { setIsModalOpen(true); setIsMenuOpen(false); }}
+                >
+                  <FileText size={22} />
+                  <span>Whitepaper</span>
+                </button>
                 <a href="#nft" className="mobile-nav-btn" onClick={() => setIsMenuOpen(false)}>
                   <Wallet size={22} />
                   <span>{t.nav.nft}</span>
@@ -1516,7 +1505,13 @@ function App() {
                   <Mail size={22} />
                   <span>{t.nav.roadmap}</span>
                 </a>
-
+                <button 
+                  className="mobile-nav-btn" 
+                  onClick={() => setLang(lang === 'RU' ? 'EN' : 'RU')}
+                >
+                  <Globe size={22} />
+                  <span>{lang === 'RU' ? 'RU / EN' : 'EN / RU'}</span>
+                </button>
               </div>
 
               {/* Mobile Lang Switch moved outside the grid for better positioning */}
@@ -1552,12 +1547,18 @@ function App() {
                 </button>
               </div>
               <div className="chart-fullscreen-content">
-                <iframe 
-                  src={`https://dexscreener.com/avalanche/${GBU_ADDRESS}?embed=1&theme=dark&trades=0&info=0`}
-                  className="chart-iframe-style"
-                  title="GBU Chart"
-                  loading="lazy"
-                />
+                {loadChart ? (
+                  <iframe 
+                    src={`https://dexscreener.com/avalanche/${GBU_ADDRESS}?embed=1&theme=dark&trades=0&info=0`}
+                    className="chart-iframe-style"
+                    title="GBU Chart"
+                    loading="eager"
+                  />
+                ) : (
+                  <div className="flex-column-center height-100-percent text-white">
+                    {lang === 'RU' ? 'Подготовка графиков...' : 'Preparing charts...'}
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
