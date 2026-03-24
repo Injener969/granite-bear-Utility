@@ -114,6 +114,8 @@ function App() {
   const [paymentAmt, setPaymentAmt] = useState(0.5525);
   const [scrolled, setScrolled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [expandedCoin, setExpandedCoin] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isChartFullscreen, setIsChartFullscreen] = useState(false);
@@ -1051,8 +1053,8 @@ function App() {
               <Send size={20} />
             </a>
             <div className="footer-divider-line"></div>
-            <a href="#" className="footer-legal-link" onClick={(e) => { e.preventDefault(); setIsModalOpen(true); }}>{t.footer.terms}</a>
-            <a href="#" className="footer-legal-link" onClick={(e) => { e.preventDefault(); setIsModalOpen(true); }}>{t.footer.privacy}</a>
+            <a href="#" className="footer-legal-link" onClick={(e) => { e.preventDefault(); setIsTermsOpen(true); }}>{t.footer.terms}</a>
+            <a href="#" className="footer-legal-link" onClick={(e) => { e.preventDefault(); setIsPrivacyOpen(true); }}>{t.footer.privacy}</a>
           </div>
 
           <div className="smart-contract contract-box-clickable" onClick={() => handleCopy()}>
@@ -1112,7 +1114,161 @@ function App() {
             </motion.div>
           )
         }
-      </AnimatePresence >
+      </AnimatePresence>
+
+      {/* TERMS OF SERVICE MODAL */}
+      <AnimatePresence>
+        {isTermsOpen && (
+          <motion.div
+            className="modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsTermsOpen(false)}
+          >
+            <motion.div
+              className="modal-content"
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <h2>{lang === 'RU' ? 'Пользовательское соглашение' : 'Terms of Service'}</h2>
+                <button className="close-btn" onClick={() => setIsTermsOpen(false)} aria-label="Close">&times;</button>
+              </div>
+              <div className="modal-body">
+                {lang === 'RU' ? (
+                  <>
+                    <h3>1. Общие положения</h3>
+                    <p>Настоящее Пользовательское соглашение регулирует отношения между Granite Bear Utility (GBU) и пользователем веб-сайта <strong>gbutoken.xyz</strong>.</p>
+                    <p>Используя данный сайт, вы подтверждаете своё согласие с условиями настоящего соглашения. Если вы не согласны с какими-либо условиями, пожалуйста, прекратите использование сайта.</p>
+
+                    <h3>2. Описание сервиса</h3>
+                    <p>GBU — это утилитарный токен цифровой программы лояльности на блокчейне Avalanche. Сайт предоставляет информацию о проекте, его токеномике, а также инструменты для взаимодействия с блокчейном (покупка, сжигание токенов).</p>
+
+                    <h3>3. Ограничения ответственности</h3>
+                    <ul>
+                      <li>GBU не является ценной бумагой или инвестиционным инструментом.</li>
+                      <li>Стоимость токена подвержена рыночной волатильности. Пользователь самостоятельно несёт все финансовые риски.</li>
+                      <li>Команда проекта не несёт ответственности за убытки, вызванные действиями третьих лиц, сбоями сети или ошибками пользователя.</li>
+                    </ul>
+
+                    <h3>4. Использование сайта</h3>
+                    <p>Пользователь обязуется не использовать сайт в незаконных целях, не предпринимать попыток взлома или нарушения работы сервиса.</p>
+
+                    <h3>5. Контактная информация</h3>
+                    <p>По всем вопросам: <a href="mailto:admin@gbutoken.xyz" className="modal-link-accent">admin@gbutoken.xyz</a></p>
+                    <p><small>Дата актуализации: Март 2026</small></p>
+                  </>
+                ) : (
+                  <>
+                    <h3>1. General Provisions</h3>
+                    <p>These Terms of Service govern the relationship between Granite Bear Utility (GBU) and the user of the website <strong>gbutoken.xyz</strong>.</p>
+                    <p>By using this site, you confirm your agreement to these terms. If you disagree, please stop using the site.</p>
+
+                    <h3>2. Service Description</h3>
+                    <p>GBU is a utility token of a digital loyalty program on the Avalanche blockchain. The site provides information about the project, its tokenomics, and tools for blockchain interaction (buying, burning tokens).</p>
+
+                    <h3>3. Limitation of Liability</h3>
+                    <ul>
+                      <li>GBU is not a security or investment instrument.</li>
+                      <li>Token value is subject to market volatility. The user bears all financial risks independently.</li>
+                      <li>The project team is not liable for losses caused by third-party actions, network failures, or user errors.</li>
+                    </ul>
+
+                    <h3>4. Site Usage</h3>
+                    <p>The user agrees not to use the site for illegal purposes or attempt to hack or disrupt the service.</p>
+
+                    <h3>5. Contact Information</h3>
+                    <p>For all inquiries: <a href="mailto:admin@gbutoken.xyz" className="modal-link-accent">admin@gbutoken.xyz</a></p>
+                    <p><small>Last updated: March 2026</small></p>
+                  </>
+                )}
+              </div>
+              <div className="modal-footer-box">
+                <button className="btn-primary" onClick={() => setIsTermsOpen(false)}>{t.whitepaperModal.close}</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* PRIVACY POLICY MODAL */}
+      <AnimatePresence>
+        {isPrivacyOpen && (
+          <motion.div
+            className="modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsPrivacyOpen(false)}
+          >
+            <motion.div
+              className="modal-content"
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <h2>{lang === 'RU' ? 'Политика конфиденциальности' : 'Privacy Policy'}</h2>
+                <button className="close-btn" onClick={() => setIsPrivacyOpen(false)} aria-label="Close">&times;</button>
+              </div>
+              <div className="modal-body">
+                {lang === 'RU' ? (
+                  <>
+                    <h3>1. Какие данные мы собираем</h3>
+                    <p>Сайт не собирает персональные данные пользователей напрямую. При подключении кошелька через WalletConnect мы получаем только публичный адрес кошелька, необходимый для работы блокчейн-функций.</p>
+
+                    <h3>2. Использование данных</h3>
+                    <p>Адрес кошелька используется исключительно для отображения баланса токенов и проведения транзакций по желанию пользователя. Мы не передаём адреса третьим лицам и не используем их в маркетинговых целях.</p>
+
+                    <h3>3. Cookies и аналитика</h3>
+                    <p>Сайт может использовать технические cookies для корректной работы интерфейса. Аналитика поведения пользователей не ведётся.</p>
+
+                    <h3>4. Сторонние сервисы</h3>
+                    <p>Сайт встраивает графики DexScreener и использует WalletConnect. На эти сервисы распространяются их собственные политики конфиденциальности.</p>
+
+                    <h3>5. Безопасность</h3>
+                    <p>Мы не храним приватные ключи пользователей. Вся работа с кошельком происходит напрямую в вашем браузере через безопасные протоколы.</p>
+
+                    <h3>6. Контакты</h3>
+                    <p>По вопросам конфиденциальности: <a href="mailto:admin@gbutoken.xyz" className="modal-link-accent">admin@gbutoken.xyz</a></p>
+                    <p><small>Дата актуализации: Март 2026</small></p>
+                  </>
+                ) : (
+                  <>
+                    <h3>1. Data We Collect</h3>
+                    <p>The site does not collect personal data directly. When connecting a wallet via WalletConnect, we only receive the public wallet address required for blockchain functionality.</p>
+
+                    <h3>2. Use of Data</h3>
+                    <p>The wallet address is used exclusively to display token balance and process transactions at the user's request. We do not share addresses with third parties or use them for marketing purposes.</p>
+
+                    <h3>3. Cookies and Analytics</h3>
+                    <p>The site may use technical cookies for interface functionality. User behavior analytics are not conducted.</p>
+
+                    <h3>4. Third-Party Services</h3>
+                    <p>The site embeds DexScreener charts and uses WalletConnect. These services are subject to their own privacy policies.</p>
+
+                    <h3>5. Security</h3>
+                    <p>We do not store private keys. All wallet interactions happen directly in your browser via secure protocols.</p>
+
+                    <h3>6. Contacts</h3>
+                    <p>Privacy inquiries: <a href="mailto:admin@gbutoken.xyz" className="modal-link-accent">admin@gbutoken.xyz</a></p>
+                    <p><small>Last updated: March 2026</small></p>
+                  </>
+                )}
+              </div>
+              <div className="modal-footer-box">
+                <button className="btn-primary" onClick={() => setIsPrivacyOpen(false)}>{t.whitepaperModal.close}</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
 
       <AnimatePresence>

@@ -20,8 +20,8 @@ export const translations = {
             close: "Понятно"
         },
         hero: {
-            title: "Токенизация реального сектора. Твой цифровой ключ к гранитной империи.",
-            subtitle: "Дефляционный утилитарный токен GBU на блокчейне Avalanche. Зафиксируй цену на гранит и получи скидку до 15% за счет смарт-сжигания.",
+            title: "Ваш цифровой резерв в реальном секторе",
+            subtitle: "Универсальный бонусный актив GBU на базе Avalanche для управления стоимостью строительных материалов. Получайте изделия из натурального гранита с привилегией до 20% и фиксацией цены от производителя.",
             buyBtn: "Купить GBU",
             wpBtn: "Whitepaper",
         },
@@ -188,8 +188,8 @@ export const translations = {
             close: "Got it"
         },
         hero: {
-            title: "Real Sector Tokenization. Your Digital Key to the Granite Empire.",
-            subtitle: "GBU deflationary utility token on Avalanche. Lock your granite price and get up to 20% discount through smart-burning.",
+            title: "Your Digital Reserve in the Real Sector",
+            subtitle: "Avalanche-based GBU universal bonus asset for construction material cost management. Get natural granite products with up to 20% privilege and manufacturer price fixation.",
             buyBtn: "Buy GBU",
             wpBtn: "Whitepaper",
         },
