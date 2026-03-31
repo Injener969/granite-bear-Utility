@@ -1,0 +1,15 @@
+{
+  "name": "Granite Bear Utility",
+  "slug": "granite-bear-utility",
+  "status": "live",
+  "highlight": "The first RWA-driven utility token for the premium granite sector, offering unique benefits for the B2B industry.",
+  "summary": "Granite Bear Utility (GBU) is the primary deflationary token of the ecosystem, designed to bridge the gap between tangible assets and DeFi. It serves as a rewards and utility layer for industry participants, offering discounts on granite products and access to exclusive B2B services via blockchain verification.",
+  "website": "https://gbutoken.xyz",
+  "twitter": "https://x.com/InjenerKarelin",
+  "logo": "logo.png",
+  "tags": ["rwa", "utility", "defi"],
+  "optional": {
+    "telegram": "https://t.me/GraniteBear",
+    "token": "GBU"
+  }
+}
