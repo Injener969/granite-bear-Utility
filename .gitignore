@@ -38,3 +38,6 @@ _agent/
 .agents/
 .agent/
 .gemini/
+
+# Local listing instructions
+listing-gbu/README_LISTING.md
